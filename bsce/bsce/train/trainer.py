@@ -524,6 +524,11 @@ class Trainer:
             best, nmse_db, best_state, stale, ep0 = part["best"], part["nmse_db"], part["best_state"], part["stale"], part["ep"]
         ref = part.get("ref", best) if part is not None else best     # the value of the last gain >= g
         shared = bool(cfg.lr_list)                   # lr_list: one epoch budget for all the stages together
+        keep = part.get("keep", best) if part is not None else best   # validation NMSE of best_state
+        if part is None and cfg.restore_best and shared and self.state.get("epochs_done", 0):
+            # a later lr_list stage starts from the previous stage's best weights: keep them unless beaten
+            keep = self.validate(st["out"])
+            best_state = {k: t.detach().clone() for k, t in self.model.state_dict().items()}
         n_ep = cfg.epochs - int(self.state.get("epochs_done", 0)) if shared else cfg.epochs - ep0
         for ep in range(ep0, ep0 + max(n_ep, 0)):
             if cfg.patience and stale >= cfg.patience:
@@ -539,12 +544,16 @@ class Trainer:
                 loss = self.loss_fn(self._fwd(self.yt[:, idx], st["out"], None if self.st is None else self.st[idx])[-1],
                                     self.xt[:, idx])
                 loss.backward()
+                if cfg.grad_clip:
+                    torch.nn.utils.clip_grad_norm_([p for grp in opt.param_groups for p in grp["params"]],
+                                                   cfg.grad_clip)
                 opt.step()
             v = self.validate(st["out"])
             if math.isnan(v):
                 raise RuntimeError("nmse is NaN")
             nmse_db = 10 * math.log10(max(v, 1e-300))
-            if cfg.restore_best and v < best:
+            if cfg.restore_best and v < keep:
+                keep = v
                 best_state = {k: t.detach().clone() for k, t in self.model.state_dict().items()}
             if g > 0:                                # min_gain_db: only a gain >= g resets the patience
                 if nmse_db < 10 * math.log10(max(ref, 1e-300)) - g:
@@ -562,10 +571,10 @@ class Trainer:
                 print(f"  epoch {ep + 1:3d}  val nmse={nmse_db:.4f} dB (best={10 * math.log10(best):.4f})")
             if self._due(ep + 1):
                 self._save_partial(st, opt, f"epoch {ep + 1}", ep=ep + 1, best=best, nmse_db=nmse_db,
-                                   best_state=best_state, stale=stale, ref=ref)
+                                   best_state=best_state, stale=stale, ref=ref, keep=keep)
         if cfg.restore_best and best_state is not None:
             self.model.load_state_dict(best_state)
-            nmse_db = 10 * math.log10(max(best, 1e-300))
+            nmse_db = 10 * math.log10(max(keep, 1e-300))
         return nmse_db
 
     def _run_steps(self, st, opt, params, part=None) -> float:

@@ -242,6 +242,7 @@ def main():
         i = int(np.argmin(np.abs(snr - q)))
         return v[i]
 
+    all_snr = sorted({float(s) for T in tables for s in T["snr"]})      # summary.csv columns
     lines_csv, md, tex, nets = [], [], [], []
     for T in tables:
         ref = T["val"].get(T["ref"]) if T["ref"] else None
@@ -258,7 +259,9 @@ def main():
             base = re.sub(r"\+polish(-snr)?$", "", m)              # v28: '<run>+polish' = that network + polish
             npar = n_params(T["runs"] / base) if (T["runs"] / base).exists() else None
             cst = None if (a.no_cost or not (T["runs"] / base).exists() or base != m) else cost(T["runs"] / base)
-            lines_csv.append([T["name"], m] + [f"{x:.4f}" for x in v] + [f"{v.mean():.4f}", "" if g is None else f"{g:.4f}",
+            by_snr = dict(zip(map(float, T["snr"]), v))
+            lines_csv.append([T["name"], m] + [f"{by_snr[s]:.4f}" if s in by_snr else "" for s in all_snr]
+                             + [f"{v.mean():.4f}", "" if g is None else f"{g:.4f}",
                                                                           "" if npar is None else npar[0],
                                                                           "" if npar is None else npar[1],
                                                                           f"{T['secs'].get(m, 0):.3f}",
@@ -279,7 +282,7 @@ def main():
             else:
                 nets.append(f"- **{m}**: classical baseline (no training)")
         tex += [r"\hline", r"\end{tabular}", ""]
-    snr_cols = [f"{x:g}dB" for x in tables[0]["snr"]]
+    snr_cols = [f"{x:g}dB" for x in all_snr]
     with open(res / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["scenario", "method"] + snr_cols + ["mean", "gain_vs_reference", "parameters_per_network", "networks",
@@ -301,7 +304,8 @@ def main():
     others = [m for m in allm if m not in refs | {"LAMP-authors", *CLASSICAL}]
     color = dict(zip(others, distinct_colors(len(others))))
     color.update({r: "#2a78d6" for r in refs})
-    color.update({"LAMP-authors": "#c23b6a", "amp": "#999999", "omp": "#666666", "sd": "#444444"})
+    color.update({"LAMP-authors": "#c23b6a", "amp": "#999999", "omp": "#666666", "sd": "#444444",
+                  "admm": "#333333", "l1": "#888888", "grwl1": "#555555"})
     style = lambda m: "--" if (m.endswith("-authors") or m in CLASSICAL) else "-"  # noqa: E731
     n = len(tables)
     nrow_tab = max(len(T["val"]) for T in tables)

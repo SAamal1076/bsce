@@ -80,6 +80,14 @@ def model_tag(mcfg):
     return t
 
 
+def _final_nmse_db(state):
+    """Validation NMSE of the saved network: the last layer's value (after restore_best), not the last epoch's."""
+    done = [v for v in state.get("layer_nmse_db", []) if v is not None]
+    if done:
+        return done[-1]
+    return state["log"][-1]["nmse_db"] if state["log"] else None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--scenario", required=True, help="a name (sv_upa, deepmimo_ula, 3gpp_upa, ...) or a yaml path")
@@ -340,7 +348,7 @@ def main():
         info = {"band": band, "noise": noise, "noise_model": nm, "T": int(mcfg.get("T", 0)), "train_seconds": time.time() - t0, "n_params": model.n_params(),
                 "data_digest": {f.name: digest(f) for f in files}}
         pt, mat = save_model(model, outdir / f"{tag}_{band['name']}", train_state=state, data_info=info)
-        log["bands"][band["name"]] = {**info, "final_val_nmse_db": state["log"][-1]["nmse_db"] if state["log"] else None,
+        log["bands"][band["name"]] = {**info, "final_val_nmse_db": _final_nmse_db(state),
                                       "layer_nmse_db": state["layer_nmse_db"], "files": [str(pt), str(mat)],
                                       # every training stage: name, last validation NMSE, iterations (as the authors' log)
                                       "stage_log": [dict(stage=s["stage"], nmse_db=s["nmse_db"], iters=s.get("iters"))

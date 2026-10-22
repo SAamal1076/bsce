@@ -68,7 +68,11 @@ def main():
         y = measurements.gen_measurements_py(xs["training"], A, snrs, rs, strict=True)
         f = out / f"{pre}_training_{sc['M']}_measurements_{band['name']}.mat"
         sio.savemat(f, {"y": y, "snr_db": snrs})
-        vs = np.asarray(band["val_snr"], float)
+        if "val_snr" in band:
+            vs = np.asarray(band["val_snr"], float)
+        else:                           # val_range: one SNR per chunk, drawn like the training file
+            vs = measurements.draw_snr_list(rs, band["val_range"][0], band["val_range"][1],
+                                            int(band.get("val_n_snr_chunks", sc["n_snr_chunks"])))
         yv = measurements.gen_measurements_py(xs["validation"], A, vs, rs, strict=True)
         fv = out / f"{pre}_validation_{sc['M']}_measurements_{band['name']}.mat"
         sio.savemat(fv, {"y": yv, "snr_db": vs})

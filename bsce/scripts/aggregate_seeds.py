@@ -35,7 +35,8 @@ def main():
             continue
         # run_suite names: <tag>_s1 (one network), <tag>_s1_ft_<edges>dB_<k> (fine-tuned; v23: <tag>_s1-ft[edges]):
         # drop the seed in all of them (bsce/naming.py)
-        groups[naming.drop_seed(c)].append(c)
+        base, polish = re.match(r"(.*?)(\+polish(?:-snr)?)?$", c).groups()       # '<run>_s1+polish' too
+        groups[naming.drop_seed(base) + (polish or "")].append(c)
     out, stats = [], {}
     for g, cols in groups.items():
         v = np.array([[float(r[c]) for c in cols] for r in rows])          # SNR x seeds

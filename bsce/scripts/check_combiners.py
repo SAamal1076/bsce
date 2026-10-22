@@ -187,6 +187,8 @@ def main():
                                       note=notes.get(m, "not evaluated")))
         md.append(f"| {m} | " + " | ".join(cells) + " |")
     (out / "combiner_check.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    if not lines_csv:
+        sys.exit("[check] nothing could be evaluated on any combiner (see the messages above)")
     with open(out / "combiner_check.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=list(lines_csv[0])); w.writeheader(); w.writerows(lines_csv)
     print("\n".join(md))

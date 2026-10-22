@@ -39,6 +39,8 @@ from bsce.rng import NumpyMatlabRNG
 
 ROOT = Path(__file__).resolve().parent.parent
 SV_A = ROOT / "data" / "SV_ULA" / "CSmatrix.mat"
+if not SV_A.exists():                  # before make_gmlamp_data.py: the same matrix from the reference files
+    SV_A = ROOT / "reference" / "gmlamp" / "CE_SV" / "CSmatrix256128.mat"
 
 
 def _A(seed=0, M=128, N=256):

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import re
 from pathlib import Path
 
 import yaml
@@ -39,14 +40,24 @@ def apply_overrides(cfg: dict, overrides) -> dict:
         parts = key.split(".")
         for p in parts[:-1]:
             d = d.setdefault(p, {})
-        v = yaml.safe_load(val)
-        if isinstance(v, str):          # YAML 1.1 reads 8e-4 / 1e5 as strings: accept them as numbers
-            try:
-                v = float(v) if any(ch in v.lower() for ch in ".e") else int(v)
-            except ValueError:
-                pass
-        d[parts[-1]] = v
+        d[parts[-1]] = _numbers(yaml.safe_load(val))
     return cfg
+
+
+_E_NUMBER = re.compile(r"[+-]?(\d+\.?\d*|\.\d+)[eE][+-]?\d+")
+
+
+def _numbers(v):
+    """YAML 1.1 reads 8e-4 / 2e4 as strings: turn them into numbers (2e4 -> int 20000), also inside lists/dicts."""
+    if isinstance(v, list):
+        return [_numbers(x) for x in v]
+    if isinstance(v, dict):
+        return {k: _numbers(x) for k, x in v.items()}
+    if isinstance(v, str) and _E_NUMBER.fullmatch(v.strip()):
+        f = float(v)
+        mantissa = re.split("[eE]", v.strip())[0]
+        return int(f) if f.is_integer() and "." not in mantissa else f
+    return v
 
 
 def resolve(path) -> Path:

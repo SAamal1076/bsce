@@ -69,8 +69,8 @@ def original_format_dict(model):
     if model.family == "lamp":
         return model.mat_dict()
     if model.family == "ladmm":
-        if getattr(model, "data_step", "plain") != "plain" or model.threshold in ("adaptive", "firm", "gm"):
-            return None                 # v28 options: LADMM_test.m computes A^T y and the soft threshold only
+        if getattr(model, "data_step", "plain") != "plain" or model.threshold != "scalar":
+            return None                 # LADMM_test.m computes A^T y and the scalar soft threshold only
         d = model.mat_dict()
         keep = ("H_matrix_", "rho_", "theta_", "alpha_")
         return {k: v for k, v in d.items() if k.startswith(keep) and k.split("_")[-1].isdigit()

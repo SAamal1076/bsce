@@ -1,7 +1,8 @@
 """Inference cost and trained-parameter count of a network (v31; used by scripts/compare.py).
 
 * macs_per_channel(net): real multiply-accumulates per channel of the ATen ops that the forward really runs, counted by a
-  dispatch mode: products (mm, addmm, bmm, mv, convolution; x4 for complex x complex) and dense factorisations / solves
+  dispatch mode: products (mm, addmm, bmm, mv, convolution; x4 for complex x complex, x2 for real x complex, where a complex
+  tensor whose imaginary part is all zero, e.g. a real matrix cast to complex, counts as real) and dense factorisations / solves
   (LU n^3/3 + n^2 per right-hand side, inverse n^3, eigen / SVD / Cholesky 4 n^3; x4 if complex). Counted on the second
   of two calls, so a cache built in the first call (Graph-LADMM's H_t) is not counted, while a factorisation made in
   every call is. Element-wise work is counted apart (sum of output sizes of the other ops) as an indicator.
@@ -24,6 +25,12 @@ _SKIP = ("view", "reshape", "expand", "unsqueeze", "squeeze", "permute", "transp
          "scalar_tensor", "_local_scalar_dense", "item", "split", "unbind", "chunk", "index_select")
 
 
+def _complex_factor(*ops) -> float:
+    """Real multiplies per complex-arithmetic product of these operands: 4 if both carry an imaginary part, 2 if one."""
+    n = sum(1 for t in ops if torch.is_tensor(t) and t.is_complex() and bool((t.imag != 0).any()))
+    return (1.0, 2.0, 4.0)[min(n, 2)]
+
+
 class MacCounter(TorchDispatchMode):
     def __init__(self):
         super().__init__()
@@ -35,11 +42,11 @@ class MacCounter(TorchDispatchMode):
         name = func.overloadpacket.__name__
         f = 4.0 if any(torch.is_tensor(a) and a.is_complex() for a in args[:3]) else 1.0
         if name in ("mm", "bmm"):
-            self.macs += f * args[0].numel() * args[1].shape[-1]
+            self.macs += _complex_factor(args[0], args[1]) * args[0].numel() * args[1].shape[-1]
         elif name in ("addmm", "baddbmm"):
-            self.macs += f * args[1].numel() * args[2].shape[-1]
+            self.macs += _complex_factor(args[1], args[2]) * args[1].numel() * args[2].shape[-1]
         elif name == "mv":
-            self.macs += f * args[0].numel()
+            self.macs += _complex_factor(args[0], args[1]) * args[0].numel()
         elif name in ("convolution", "_convolution", "cudnn_convolution", "mkldnn_convolution"):
             o = out if torch.is_tensor(out) else out[0]
             self.macs += f * o.numel() * (args[1].numel() / args[1].shape[0])

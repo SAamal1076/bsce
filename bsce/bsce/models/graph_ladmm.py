@@ -47,7 +47,8 @@ Data step (option data_step, v31): 'whitened' (default) as above; 'plain' the pa
 1/2 ||y - A x||^2: A^+ y -> A^T y and P -> A^T A, i.e. x_t = (A^T A + rho_t (I [+ D^H D]))^-1 (A^T y + ...), through
 the thin SVD of A without TV. The noise level s is the whitened residual in both.
     e_bar_i = (|w_i|^2 + a1_t S1|w|^2 + a2_t S2|w|^2) / (1 + 2 a1_t + 2 a2_t): pooled neighbour energy, phase-free
-              (S1, S2: the two neighbours at offset 1 and 2 on the ULA, along axis 1 and axis 2 on the UPA)
+              (S1, S2: the two neighbours at offset 1 and 2 on the ULA; on the UPA, S1 along axis 0 (slow index a) and S2
+              along axis 1 (fast index b), as in beam_edges)
 
 Noise level s (option sigma): 'residual' (default) s^2 = ||y_w - A_w z1_{t-1}||^2 / M per channel (layer 1: ||y_w||^2/M);
 'blind' s = median_i |w_i| / sqrt(ln 2); 'known' s^2 = the true noise variance (needs_noise_var, as NF-LADMM).
@@ -179,7 +180,7 @@ class GraphLADMM(UnrolledNet):
         self.register_buffer("I_e", torch.tensor([e[0] for e in E], dtype=torch.long))
         self.register_buffer("J_e", torch.tensor([e[1] for e in E], dtype=torch.long))
         self.register_buffer("cls_e", torch.tensor([self.classes.index(e[2]) for e in E], dtype=torch.long))
-        ph0 = np.full(len(self.classes), self._phase_default())
+        ph0 = np.array([self._phase_default(ax) for ax, _ in self.classes], dtype=float)
         if self.learn_phase:
             self._p("phase", ph0)
         else:
@@ -278,13 +279,13 @@ class GraphLADMM(UnrolledNet):
         self._set_buffers(A)
 
     # -- graph ----------------------------------------------------------------------------------------------------------
-    def _phase_default(self) -> float:
+    def _phase_default(self, axis: int = 1) -> float:
         ep = self.edge_phase
         if ep in ("blind", None):
             return 0.0
         if isinstance(ep, (int, float)) and not isinstance(ep, bool):
             return math.radians(float(ep))
-        n = self.N if self.array == "ULA" else self.N2
+        n = self.N if self.array == "ULA" else (self.N1 if axis == 0 else self.N2)
         return -math.pi / n                                    # 'theory' (element-0 reference); 'data' until estimated
 
     def init_from_data(self, X):

@@ -317,9 +317,9 @@ def choose_polish(a, sc, smoke, pre, A, nm, models):
 def _style(k, m):
     pal = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948",
            "#52514e", "#00a3c4", "#a05a00", "#b03bb0"]
-    classical = m in ("amp", "omp", "sd", "admm")
+    is_classical = m in classical.METHODS
     marks = "osD^v<>Ph*Xd"
-    return dict(color=pal[k % len(pal)], ls="--" if classical else "-", marker=marks[(k // len(pal) + k) % len(marks)])
+    return dict(color=pal[k % len(pal)], ls="--" if is_classical else "-", marker=marks[(k // len(pal) + k) % len(marks)])
 
 
 def _repel(vals, gap):
