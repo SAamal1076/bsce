@@ -1,0 +1,18 @@
+{
+ "original": {
+  "final_rel_diff": 1.1817319229040455,
+  "final_mean_spread": 0.0,
+  "final_val_nmse_db": [
+   -1.2460222094300262,
+   -1.2647383643720365
+  ]
+ },
+ "spread": {
+  "final_rel_diff": 1.9367750717843316e-15,
+  "final_mean_spread": 1.1631293304990464,
+  "final_val_nmse_db": [
+   -1.287266013787778,
+   -1.287266013787778
+  ]
+ }
+}

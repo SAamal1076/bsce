@@ -1,0 +1,12 @@
+# Proposed: LADMM with exact ADMM x-update and a learned Kronecker prior (UPA), 512 params/layer
+model: {model: LADMM, T: 6, operator: kronprior, untied: true, precision: float32, prior_init: 0.1}
+train:
+  schedule: borgerding
+  lr: 1.0e-3
+  refinements: [0.5, 0.1, 0.01]
+  maxit: 35000
+  better_wait: 2000
+  batch_size: 1024
+  loss: nmse
+  val_round: 5
+  optimizer: adam_tf1

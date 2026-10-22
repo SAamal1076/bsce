@@ -1,0 +1,26 @@
+# Training protocol of GM-LAMP / LAMP (Train_GM-LAMP.py + define_networks.do_training), applied to
+# ANY method with  --protocol gmlamp  (train.py / run_all.py). Data, CS matrix (CSmatrix256128.mat),
+# 80k/2k/2k channels, SNR bands 0-10 / 10-20 dB validated at 10 dB come from the scenario file.
+#   layer-wise: each new layer alone at lr, then all layers at lr*{0.5, 0.1, 0.01}
+#   new layer initialised from the trained previous layer (warm start), Adam (TF1), batch 128,
+#   validation every 10 steps, round(nmse, 5), stop when the best is older than 5000 steps
+model:
+  precision: float32           # every method in float32 (as ladmm_best; GM-LAMP is float32-safe)
+train:
+  restore_best: false
+  noise: file                  # every method: training noise from the measurement files (same noise for all)
+  schedule: borgerding
+  grad_clip: null             # no clipping for every method (NF-LADMM configs set 1.0 for their own end-to-end training)
+  lr: 1.0e-3
+  refinements: [0.5, 0.1, 0.01]
+  maxit: 1000000
+  better_wait: 5000
+  ivl: 10
+  check_mult: 100
+  batch_size: 128
+  loss: nmse
+  val_metric: nmse
+  val_round: 5
+  warm_start: true
+  refine_name: index
+  optimizer: adam_tf1

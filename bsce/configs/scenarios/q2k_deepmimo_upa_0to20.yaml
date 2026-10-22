@@ -1,0 +1,36 @@
+# made by scripts/make_scenario.py from q2k_deepmimo_upa.yaml
+_base: q2k_deepmimo_upa.yaml
+name: Q2k_deepmimo_upa_0to20
+data_dir: data/Q2k_deepmimo_upa_0to20
+n_train: 2000
+n_val: 1000
+n_test: 2000
+bands:
+- name: 0to20dB
+  train:
+  - 0
+  - 20
+  val_snr:
+  - 7.25
+  - 4.6361
+  - 5.506
+  - 13.6047
+  - 0.003
+  - 13.9644
+  - 4.8071
+  - 11.5886
+  - 5.1461
+  - 15.5964
+  - 1.1042
+  - 1.7792
+  - 8.2781
+  - 16.4652
+  - 2.3631
+  - 3.3299
+  - 10.639
+  - 2.2133
+  - 14.0715
+  - 7.8969
+  use_for:
+  - 0
+  - 20.01

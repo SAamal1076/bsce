@@ -1,0 +1,8 @@
+# Same channels as sv_ula_user.yaml (data/SV), one network per band: 0-10 dB and 10-20 dB (like GM-LAMP), validated on
+# the whole band (SNR ~ U(band), 100 chunks). Measurement files: python scripts/make_sv_measurements.py --scenario <this file>
+# finetune_bands.py writes its band networks under this scenario name (outputs/SV_ULA_user_2band/...).
+_base: sv_ula_user.yaml
+name: SV_ULA_user_2band
+bands:
+  - {name: 0to10dB,  train: [0, 10],  val_range: [0, 10],  use_for: [0, 10]}
+  - {name: 10to20dB, train: [10, 20], val_range: [10, 20], use_for: [10, 20.01]}

@@ -1,0 +1,16 @@
+# ALISTA (analytic W, support selection) with the ALISTA-repository training schedule (utils/train.py)
+model: {model: ALISTA, T: 16, lam: 0.4, percent: 1.2, max_percent: 13.0, complex_mode: true, precision: float32}
+train:
+  schedule: alista
+  lr: 5.0e-4
+  lr_decay: [0.2, 0.02]
+  decay_rate: 0.3
+  maxit: 200000
+  better_wait: 4000
+  ivl: 10
+  check_mult: 10
+  batch_size: 64
+  loss: l2
+  val_metric: nmse_l2
+  val_round: null
+  optimizer: adam_tf1

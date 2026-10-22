@@ -1,0 +1,4 @@
+# One network for the whole 0-20 dB range (fair single-model protocol).
+_base: sv_upa.yaml
+bands:
+  - {name: 0to20dB, train: [0, 20], val_snr: [0, 5, 10, 15, 20], use_for: [0, 20.01]}

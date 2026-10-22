@@ -1,0 +1,522 @@
+{
+ "sets": {
+  "UPA": {
+   "generator": "bsce scripts/sionna_make_H.py",
+   "implementation": "Sionna 2.2.0 (sionna.phy.channel.tr38901.UMi, 3GPP TR 38.901 v16.1)",
+   "array": "UPA",
+   "num_ant_x": 1,
+   "num_ant_y": 16,
+   "num_ant_z": 16,
+   "ant_spacing": 0.5,
+   "scenario": "3GPP_38.901_UMi",
+   "fc": 28000000000.0,
+   "element": "3gpp",
+   "isd": 200.0,
+   "d_min": 10.0,
+   "h_bs": 10.0,
+   "h_ut": 1.5,
+   "indoor_frac": 0.0,
+   "drop_users": 250,
+   "part_users": 5000,
+   "seed": 2026,
+   "K_total": 100000,
+   "narrowband": 1,
+   "ue_antenna": "omni",
+   "spec": "16.1",
+   "table": "v16",
+   "zsd_fix": 1,
+   "realized": 0,
+   "array_axes": "UPA y-z",
+   "files": [
+    "/home/claude/q3gpp/sionna/H_3gpp_upa_part001.mat",
+    "/home/claude/q3gpp/sionna/H_3gpp_upa_part002.mat"
+   ]
+  },
+  "ULA_Y": {
+   "generator": "bsce scripts/sionna_make_H.py",
+   "implementation": "Sionna 2.2.0 (sionna.phy.channel.tr38901.UMi, 3GPP TR 38.901 v16.1)",
+   "array": "ULA_Y",
+   "num_ant_x": 1,
+   "num_ant_y": 256,
+   "num_ant_z": 1,
+   "ant_spacing": 0.5,
+   "scenario": "3GPP_38.901_UMi",
+   "fc": 28000000000.0,
+   "element": "3gpp",
+   "isd": 200.0,
+   "d_min": 10.0,
+   "h_bs": 10.0,
+   "h_ut": 1.5,
+   "indoor_frac": 0.0,
+   "drop_users": 250,
+   "part_users": 5000,
+   "seed": 2026,
+   "K_total": 100000,
+   "narrowband": 1,
+   "ue_antenna": "omni",
+   "spec": "16.1",
+   "table": "v16",
+   "zsd_fix": 1,
+   "realized": 0,
+   "array_axes": "ULA y (horizontal)",
+   "files": [
+    "/home/claude/q3gpp/sionna/H_3gpp_ulay_part001.mat",
+    "/home/claude/q3gpp/sionna/H_3gpp_ulay_part002.mat"
+   ]
+  },
+  "ULA": {
+   "generator": "bsce scripts/sionna_make_H.py",
+   "implementation": "Sionna 2.2.0 (sionna.phy.channel.tr38901.UMi, 3GPP TR 38.901 v16.1)",
+   "array": "ULA",
+   "num_ant_x": 1,
+   "num_ant_y": 1,
+   "num_ant_z": 256,
+   "ant_spacing": 0.5,
+   "scenario": "3GPP_38.901_UMi",
+   "fc": 28000000000.0,
+   "element": "3gpp",
+   "isd": 200.0,
+   "d_min": 10.0,
+   "h_bs": 10.0,
+   "h_ut": 1.5,
+   "indoor_frac": 0.0,
+   "drop_users": 250,
+   "part_users": 5000,
+   "seed": 2026,
+   "K_total": 100000,
+   "narrowband": 1,
+   "ue_antenna": "omni",
+   "spec": "16.1",
+   "table": "v16",
+   "zsd_fix": 1,
+   "realized": 0,
+   "array_axes": "ULA z (vertical)",
+   "files": [
+    "/home/claude/q3gpp/sionna/H_3gpp_ulaz_part001.mat",
+    "/home/claude/q3gpp/sionna/H_3gpp_ulaz_part002.mat"
+   ]
+  }
+ },
+ "standard": {
+  "scenario": "3GPP_38.901_UMi",
+  "fc_GHz": 28.0,
+  "h_bs": 10.0,
+  "h_ut": 1.5,
+  "n_users": 10000,
+  "table": "v16",
+  "implementation": "Sionna 2.2.0 (sionna.phy.channel.tr38901.UMi, 3GPP TR 38.901 v16.1)",
+  "fixes": {
+   "zsd_fix": 1
+  },
+  "los_probability": {
+   "expected": 0.3932732639998017,
+   "observed": 0.395,
+   "binomial_sd": 0.004884766154308146,
+   "z": 0.3534940968822813,
+   "bins": [
+    {
+     "d_mid": 15.122259067248116,
+     "observed": 0.9922779922779923,
+     "sd": 0.005439160989818375,
+     "expected": 0.9927905924252053,
+     "n": 259
+    },
+    {
+     "d_mid": 25.36677720174435,
+     "observed": 0.8370535714285714,
+     "sd": 0.017448578149402736,
+     "expected": 0.8491316738267374,
+     "n": 448
+    },
+    {
+     "d_mid": 35.61129533624059,
+     "observed": 0.7262723521320495,
+     "sd": 0.016536434811862365,
+     "expected": 0.688345206062435,
+     "n": 727
+    },
+    {
+     "d_mid": 45.85581347073682,
+     "observed": 0.5446960667461264,
+     "sd": 0.017192809069253537,
+     "expected": 0.5625019579554155,
+     "n": 839
+    },
+    {
+     "d_mid": 56.10033160523305,
+     "observed": 0.4692898272552783,
+     "sd": 0.015460210997223956,
+     "expected": 0.4623256011783715,
+     "n": 1042
+    },
+    {
+     "d_mid": 66.34484973972928,
+     "observed": 0.3850671140939597,
+     "sd": 0.014094314139211937,
+     "expected": 0.38708675159218736,
+     "n": 1192
+    },
+    {
+     "d_mid": 76.58936787422553,
+     "observed": 0.33276304533789564,
+     "sd": 0.01378162204058671,
+     "expected": 0.328276918498053,
+     "n": 1169
+    },
+    {
+     "d_mid": 86.83388600872175,
+     "observed": 0.2868352223190933,
+     "sd": 0.013354556626838383,
+     "expected": 0.27872395496081187,
+     "n": 1147
+    },
+    {
+     "d_mid": 97.078404143218,
+     "observed": 0.2328888888888889,
+     "sd": 0.012601645547607843,
+     "expected": 0.24006754301092526,
+     "n": 1125
+    },
+    {
+     "d_mid": 107.32292227771421,
+     "observed": 0.18911439114391143,
+     "sd": 0.011893986596779562,
+     "expected": 0.21031783606913604,
+     "n": 1084
+    },
+    {
+     "d_mid": 117.56744041221046,
+     "observed": 0.20153061224489796,
+     "sd": 0.01432654987578073,
+     "expected": 0.1876733295433403,
+     "n": 784
+    },
+    {
+     "d_mid": 127.81195854670669,
+     "observed": 0.22950819672131148,
+     "sd": 0.031085479220295573,
+     "expected": 0.16867022223736033,
+     "n": 183
+    }
+   ]
+  },
+  "K_LOS_dB": {
+   "median": 8.946415942696344,
+   "rstd": 5.225241075565709,
+   "table_mu": 9.0,
+   "table_sigma": 5.0,
+   "n": 3950
+  },
+  "lsp": [
+   {
+    "state": "LOS",
+    "lsp": "DS",
+    "n": 3950,
+    "median": 33.18520400579262,
+    "table_median": 32.28675793096405,
+    "log_offset": 0.011920010998315522,
+    "log_rstd": 0.3860433040708538,
+    "table_log_sigma": 0.38
+   },
+   {
+    "state": "LOS",
+    "lsp": "ASD",
+    "n": 3950,
+    "median": 14.033962302381802,
+    "table_median": 13.705032633410692,
+    "log_offset": 0.010300126669486542,
+    "log_rstd": 0.42573674533255446,
+    "table_log_sigma": 0.41
+   },
+   {
+    "state": "LOS",
+    "lsp": "ASA",
+    "n": 3950,
+    "median": 42.41636951339417,
+    "table_median": 41.02118196462051,
+    "log_offset": 0.014525276088126926,
+    "log_rstd": 0.2947413230583668,
+    "table_log_sigma": 0.30047357197058544
+   },
+   {
+    "state": "LOS",
+    "lsp": "ZSD",
+    "n": 3950,
+    "median": 1.1860002067200028,
+    "table_median": 1.2323698056416192,
+    "log_offset": -0.017377581713312357,
+    "log_rstd": 0.34607730802948633,
+    "table_log_sigma": 0.35
+   },
+   {
+    "state": "LOS",
+    "lsp": "ZSA",
+    "n": 3950,
+    "median": 3.775696572286189,
+    "table_median": 3.8349546392385645,
+    "log_offset": -0.0067632130829379244,
+    "log_rstd": 0.2827677734442672,
+    "table_log_sigma": 0.28150408008404176
+   },
+   {
+    "state": "NLOS",
+    "lsp": "DS",
+    "n": 6050,
+    "median": 64.8989253921057,
+    "table_median": 65.92111328119353,
+    "log_offset": -0.006786975754831115,
+    "log_rstd": 0.5122915867666347,
+    "table_log_sigma": 0.5139836796638331
+   },
+   {
+    "state": "NLOS",
+    "lsp": "ASD",
+    "n": 6050,
+    "median": 15.979500688770111,
+    "table_median": 15.618827655934565,
+    "log_offset": 0.009914701238715407,
+    "log_rstd": 0.490637150194576,
+    "table_log_sigma": 0.4908637797688852
+   },
+   {
+    "state": "NLOS",
+    "lsp": "ASA",
+    "n": 6050,
+    "median": 50.80616750013887,
+    "table_median": 49.31830786708208,
+    "log_offset": 0.012908275152160642,
+    "log_rstd": 0.3675781068231228,
+    "table_log_sigma": 0.3731198998949478
+   },
+   {
+    "state": "NLOS",
+    "lsp": "ZSD",
+    "n": 6050,
+    "median": 0.8983692765421631,
+    "table_median": 0.8713651886439415,
+    "log_offset": 0.012404609866661573,
+    "log_rstd": 0.35168184547555725,
+    "table_log_sigma": 0.35
+   },
+   {
+    "state": "NLOS",
+    "lsp": "ZSA",
+    "n": 6050,
+    "median": 7.478903466402975,
+    "table_median": 7.269491846260458,
+    "log_offset": 0.012333843187573301,
+    "log_rstd": 0.3091669262329286,
+    "table_log_sigma": 0.3076321401470731
+   }
+  ]
+ },
+ "beamspace": {
+  "SV UPA": {
+   "beams95_median": 30.0,
+   "beams95_p10": 12.0,
+   "beams95_p90": 53.0,
+   "top1_energy": 0.38223241495619315,
+   "top16_energy": 0.9037253364886763,
+   "n": 2000
+  },
+  "DeepMIMO UPA": {
+   "beams95_median": 15.0,
+   "beams95_p10": 4.0,
+   "beams95_p90": 33.0,
+   "top1_energy": 0.5828539442308418,
+   "top16_energy": 0.948255687757501,
+   "n": 2000
+  },
+  "3GPP UPA": {
+   "beams95_median": 17.0,
+   "beams95_p10": 7.0,
+   "beams95_p90": 38.0,
+   "top1_energy": 0.41135861025218795,
+   "top16_energy": 0.9374975620417046,
+   "n": 2000
+  },
+  "SV ULA": {
+   "beams95_median": 9.0,
+   "beams95_p10": 4.0,
+   "beams95_p90": 16.0,
+   "top1_energy": 0.4806252120835877,
+   "top16_energy": 0.9729846236692361,
+   "n": 2000
+  },
+  "DeepMIMO ULA (z axis)": {
+   "beams95_median": 7.0,
+   "beams95_p10": 2.0,
+   "beams95_p90": 11.0,
+   "top1_energy": 0.6273809996334843,
+   "top16_energy": 0.9851088208517209,
+   "n": 2000
+  },
+  "3GPP ULA (y axis)": {
+   "beams95_median": 62.0,
+   "beams95_p10": 8.0,
+   "beams95_p90": 118.0,
+   "top1_energy": 0.295550148479035,
+   "top16_energy": 0.6570281792580336,
+   "n": 2000
+  },
+  "3GPP ULA (z axis)": {
+   "beams95_median": 8.0,
+   "beams95_p10": 4.0,
+   "beams95_p90": 17.0,
+   "top1_energy": 0.5121717634524519,
+   "top16_energy": 0.9761516508294276,
+   "n": 2000
+  }
+ },
+ "lmmse": {
+  "SV UPA": {
+   "snr_db": [
+    0,
+    5,
+    10,
+    15,
+    20
+   ],
+   "nmse_db": [
+    -3.186992340532329,
+    -5.178320415543035,
+    -7.409148318570095,
+    -9.567872405379964,
+    -11.380848436063172
+   ],
+   "n_cov": 6000
+  },
+  "DeepMIMO UPA": {
+   "snr_db": [
+    0,
+    5,
+    10,
+    15,
+    20
+   ],
+   "nmse_db": [
+    -9.010729554950274,
+    -12.655267431158173,
+    -16.64307869566788,
+    -20.800808816159343,
+    -25.030498718660734
+   ],
+   "n_cov": 6000
+  },
+  "3GPP UPA": {
+   "snr_db": [
+    0,
+    5,
+    10,
+    15,
+    20
+   ],
+   "nmse_db": [
+    -5.359447655717772,
+    -8.04302443967453,
+    -11.039046423144981,
+    -14.12146578558935,
+    -17.128891509406436
+   ],
+   "n_cov": 6000
+  },
+  "SV ULA": {
+   "snr_db": [
+    0,
+    5,
+    10,
+    15,
+    20
+   ],
+   "nmse_db": [
+    -1.5487682905313336,
+    -2.444872653070399,
+    -3.060896216049654,
+    -3.3425162833338184,
+    -3.4441458577326225
+   ],
+   "n_cov": 6000
+  },
+  "DeepMIMO ULA (z axis)": {
+   "snr_db": [
+    0,
+    5,
+    10,
+    15,
+    20
+   ],
+   "nmse_db": [
+    -7.580083389743356,
+    -11.128330368250289,
+    -15.034718195010397,
+    -19.13692937550062,
+    -23.446283416247013
+   ],
+   "n_cov": 6000
+  },
+  "3GPP ULA (y axis)": {
+   "snr_db": [
+    0,
+    5,
+    10,
+    15,
+    20
+   ],
+   "nmse_db": [
+    -1.4638104093683482,
+    -2.458838219745344,
+    -3.1871055470702148,
+    -3.5378101301637384,
+    -3.6711488760556255
+   ],
+   "n_cov": 6000
+  },
+  "3GPP ULA (z axis)": {
+   "snr_db": [
+    0,
+    5,
+    10,
+    15,
+    20
+   ],
+   "nmse_db": [
+    -5.714836511035754,
+    -8.370970462264088,
+    -11.312683550483793,
+    -14.363617522425155,
+    -17.29871499562432
+   ],
+   "n_cov": 6000
+  }
+ },
+ "transfer_gmlamp": {
+  "GM-LAMP(SV UPA, 0to10dB) on SV UPA at 5 dB": -12.656745903772261,
+  "GM-LAMP(SV UPA, 0to10dB) on DeepMIMO UPA at 5 dB": -7.800837635624913,
+  "GM-LAMP(SV UPA, 0to10dB) on 3GPP UPA at 5 dB": -3.00944375257915,
+  "GM-LAMP(SV UPA, 10to20dB) on SV UPA at 15 dB": -18.602703498089085,
+  "GM-LAMP(SV UPA, 10to20dB) on DeepMIMO UPA at 15 dB": -9.876420985406936,
+  "GM-LAMP(SV UPA, 10to20dB) on 3GPP UPA at 15 dB": -0.6890638036925321,
+  "GM-LAMP(DeepMIMO UPA, 0to10dB) on SV UPA at 5 dB": 0.30334984431040135,
+  "GM-LAMP(DeepMIMO UPA, 0to10dB) on DeepMIMO UPA at 5 dB": -18.050081705705033,
+  "GM-LAMP(DeepMIMO UPA, 0to10dB) on 3GPP UPA at 5 dB": 1.5834167036621791,
+  "GM-LAMP(DeepMIMO UPA, 10to20dB) on SV UPA at 15 dB": -0.4163958335911083,
+  "GM-LAMP(DeepMIMO UPA, 10to20dB) on DeepMIMO UPA at 15 dB": -25.8429956525691,
+  "GM-LAMP(DeepMIMO UPA, 10to20dB) on 3GPP UPA at 15 dB": 0.6100786047135333,
+  "GM-LAMP(SV ULA, 0to10dB) on SV ULA at 5 dB": -13.74056448255436,
+  "GM-LAMP(SV ULA, 0to10dB) on DeepMIMO ULA (z axis) at 5 dB": -9.688641573052589,
+  "GM-LAMP(SV ULA, 0to10dB) on 3GPP ULA (y axis) at 5 dB": -2.536375334662732,
+  "GM-LAMP(SV ULA, 0to10dB) on 3GPP ULA (z axis) at 5 dB": -8.722671787487315,
+  "GM-LAMP(SV ULA, 10to20dB) on SV ULA at 15 dB": -20.785998534381314,
+  "GM-LAMP(SV ULA, 10to20dB) on DeepMIMO ULA (z axis) at 15 dB": -12.93481591827694,
+  "GM-LAMP(SV ULA, 10to20dB) on 3GPP ULA (y axis) at 15 dB": -1.1005614245789144,
+  "GM-LAMP(SV ULA, 10to20dB) on 3GPP ULA (z axis) at 15 dB": -12.382955023861227,
+  "GM-LAMP(DeepMIMO ULA, 0to10dB) on SV ULA at 5 dB": -0.44136310586316274,
+  "GM-LAMP(DeepMIMO ULA, 0to10dB) on DeepMIMO ULA (z axis) at 5 dB": -18.957939855369073,
+  "GM-LAMP(DeepMIMO ULA, 0to10dB) on 3GPP ULA (y axis) at 5 dB": -0.41302970572565834,
+  "GM-LAMP(DeepMIMO ULA, 0to10dB) on 3GPP ULA (z axis) at 5 dB": -6.140481631079208,
+  "GM-LAMP(DeepMIMO ULA, 10to20dB) on SV ULA at 15 dB": 0.33778832076582466,
+  "GM-LAMP(DeepMIMO ULA, 10to20dB) on DeepMIMO ULA (z axis) at 15 dB": -26.549766091236442,
+  "GM-LAMP(DeepMIMO ULA, 10to20dB) on 3GPP ULA (y axis) at 15 dB": 0.02868047026088058,
+  "GM-LAMP(DeepMIMO ULA, 10to20dB) on 3GPP ULA (z axis) at 15 dB": -8.845262816669416
+ }
+}

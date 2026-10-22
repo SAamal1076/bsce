@@ -1,0 +1,21 @@
+# Graph-LADMM (v31), the uploaded graph_reweighted_l1 package's method unrolled: graph-reweighted l1 z-step (weights
+# from the previous layer's estimate, pooled on the beam and its graph neighbours) and the package's unwhitened
+# least-squares data step, no TV. 44 parameters at T = 8 (every one trained). Measured on SV UPA (18 Oct, 4,500 steps):
+# 1.33 dB behind gladmm, 1.08 dB ahead of the classical method (scripts/tune_classical.py, evaluate.py --classical grwl1).
+# Its own end-to-end training: run_suite.py --protocol paper (as gladmm).
+model: {model: Graph-LADMM, T: 8, zstep: rwl1, xstep: analytic, data_step: plain, sigma: residual, edge_phase: data,
+        lr_mult: 10.0, precision: float32}
+train:
+  schedule: steps
+  steps: 30000
+  lr: 1.0e-3
+  lr_final_frac: 0.05
+  grad_clip: 1.0
+  batch_size: 256
+  loss: log_nse
+  val_metric: nmse
+  val_round: null
+  val_every: 500
+  restore_best: true
+  optimizer: adam_torch
+  noise: online

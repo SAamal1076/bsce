@@ -1,0 +1,22 @@
+# Graph-LADMM (v29), combiner-agnostic TRAINING: the analytic network of gladmm.yaml, trained with a new random
+# +-1/sqrt(M) combiner every minibatch (train.combiner=random), so it works with any combiner of this size, e.g. the
+# DeepMIMO sets' combiner or a new one. Validation and the saved network use the scenario's combiner.
+# Needs online noise: train it with run_suite.py --protocol paper (its own settings below).
+model: {model: Graph-LADMM, T: 8, zstep: gtv_gate, xstep: analytic, sigma: residual, edge_phase: data, lr_mult: 10.0,
+        precision: float32}
+train:
+  schedule: steps
+  steps: 30000
+  lr: 1.0e-3
+  lr_final_frac: 0.05
+  grad_clip: 1.0
+  batch_size: 256
+  loss: log_nse
+  val_metric: nmse
+  val_round: null
+  val_every: 500
+  restore_best: true
+  optimizer: adam_torch
+  noise: online
+  combiner: random
+  combiner_every: 1

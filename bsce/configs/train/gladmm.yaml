@@ -1,0 +1,22 @@
+# Graph-LADMM (v29), analytic x-step: (P + rho_t (I + D^H D))^-1 through the combiner, nothing learned for one combiner
+# (set_combiner: it works with another combiner and another data set). Magnetic graph TV on the beam ring / torus
+# (edge phases from the training channels) + the energy gate on the beam graph (zstep gtv_gate: the best analytic
+# network of the v29 CPU check); noise level from the residual (no sigma given).
+# Own training (run_suite.py --protocol paper): end to end, like NF-LADMM. With the default --protocol ladmm_best the
+# common layer-wise protocol replaces it, as for every method.
+model: {model: Graph-LADMM, T: 8, zstep: gtv_gate, xstep: analytic, sigma: residual, edge_phase: data, lr_mult: 10.0,
+        precision: float32}
+train:
+  schedule: steps
+  steps: 30000
+  lr: 1.0e-3
+  lr_final_frac: 0.05
+  grad_clip: 1.0
+  batch_size: 256
+  loss: log_nse
+  val_metric: nmse
+  val_round: null
+  val_every: 500
+  restore_best: true
+  optimizer: adam_torch
+  noise: online

@@ -1,0 +1,8 @@
+# runtime (training, evaluation, export). PyTorch is NOT listed: install the CUDA build first,
+# see README section 1 (on Windows the default PyPI wheel of torch is CPU-only).
+numpy>=1.24
+scipy>=1.10
+pyyaml>=6
+matplotlib>=3.7
+markdown>=3.4            # scripts/render_report.py
+pytest>=7                # tests/test_gpu_vs_cpu.py, tests/test_golden.py

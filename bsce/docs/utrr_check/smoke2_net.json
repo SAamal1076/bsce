@@ -1,0 +1,13 @@
+{
+ "a_init_forward_max_abs_diff": 0.0,
+ "a_init_nmse_dB": -2.3697081051009143,
+ "b_params_no_bn": 1966140,
+ "b_params_paper_L(2MN+2)": 1966140,
+ "b_params_with_bn": 1997884,
+ "c_params_without_gradient": [],
+ "d_truncation_max_abs_diff": 0.0,
+ "e_complex_wrapper_max_abs_diff": 0.0,
+ "f_forward_ms_per_128_real_samples_cpu": 21.7,
+ "f_train_step_ms_per_128_real_samples_cpu": 121.3,
+ "torch_threads": 2
+}

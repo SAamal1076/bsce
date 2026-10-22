@@ -23,3 +23,6 @@ build/
 
 # Logs
 *.log
+
+# bsce: keep the test logs shipped with the package
+!bsce/**/*.log

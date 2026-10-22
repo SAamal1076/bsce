@@ -1,0 +1,20 @@
+# UTRR (Wu, Cheng, Eldar, Cioffi, IEEE TCOM 2025; docs/UTRR.md), with the paper's own training (Sec. V-A):
+#   30 unfolding layers, top-K = 16 in the last layer only (RCC), no batch normalisation (Algorithm 2 and the
+#   parameter count L(2MN + 2); Fig. 6 draws BN layers: --set model.bn=true, see docs/UTRR.md);
+#   end to end, Adam, loss E||x - xhat||^2, learning rates 0.005 -> 0.001 -> 0.0005 -> 0.0002 -> 0.0001 with early
+#   stopping (10 epochs without improvement) per rate, at most 300 epochs in all, batch 128 real samples = 64 complex
+#   columns (the paper stacks the real and imaginary parts), the best validated weights kept.
+# Other top-K values (the paper's ensemble uses 0, 16, 64, 256): --set model.K=64.
+model: {model: UTRR, T: 30, K: 16, rcc: true, bn: false, rho: 1.0, alpha: 0.1, precision: float32}
+train:
+  schedule: end2end
+  lr: 5.0e-3
+  lr_list: [5.0e-3, 1.0e-3, 5.0e-4, 2.0e-4, 1.0e-4]
+  epochs: 300
+  patience: 10
+  batch_size: 64
+  loss: mse
+  val_round: null
+  optimizer: adam_torch
+  restore_best: true
+  noise: file

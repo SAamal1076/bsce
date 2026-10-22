@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="token" content="__TOKEN__">
+<title>bsce workbench</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='1' width='6' height='6' fill='%232F62C8'/%3E%3Crect x='9' y='1' width='6' height='6' fill='%23D99A00'/%3E%3Crect x='1' y='9' width='6' height='6' fill='%232F62C8'/%3E%3Crect x='9' y='9' width='6' height='6' fill='none' stroke='%232F62C8'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#/step/env" aria-label="bsce workbench, first step">
+    <span class="brand-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span>bsce workbench</span><span class="ver" id="ver"></span>
+  </a>
+  <span class="where" id="where" title="The bsce folder of this workbench"></span>
+  <button class="pyline" id="pyline" type="button" title="The Python that runs the steps. Click to change it.">
+    <span class="pyline-k">Python</span><span id="pypath">…</span>
+  </button>
+  <span class="gpu" id="gpu" hidden title="GPU load, memory and temperature (nvidia-smi)"></span>
+  <a class="queue" id="queue" href="#/runs"><span id="queue-text">No runs yet</span></a>
+  <button class="btn ghost" id="open-settings" type="button">Settings</button>
+</header>
+
+<div class="others" id="others" role="alert" hidden></div>
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Steps"></nav>
+  <main class="main" id="main" tabindex="-1"></main>
+  <aside class="cmd" id="cmd" aria-label="Commands"></aside>
+</div>
+
+<dialog id="settings" class="sheet">
+  <form method="dialog" id="settings-form">
+    <h2>Settings</h2>
+    <p class="muted">The steps run with the Python of the conda environment below. Leave a path empty to detect it.</p>
+    <label class="fld"><span class="lab">Environment name</span><input name="env_name" autocomplete="off"></label>
+    <label class="fld"><span class="lab">Python of the steps (empty = the environment's)</span><input name="python" autocomplete="off" placeholder="C:\Users\you\anaconda3\envs\bsce\python.exe"></label>
+    <label class="fld"><span class="lab">conda (empty = detect)</span><input name="conda" autocomplete="off" placeholder="C:\Users\you\anaconda3\Scripts\conda.exe"></label>
+    <label class="fld"><span class="lab">Default device</span>
+      <select name="device"><option value="cuda">cuda (GPU)</option><option value="auto">auto</option><option value="cpu">cpu</option></select></label>
+    <label class="fld"><span class="lab">Show commands for</span>
+      <select name="show"><option value="spyder">the Spyder console (%run)</option><option value="terminal">the Anaconda Prompt (python)</option></select></label>
+    <dl class="detected" id="detected"></dl>
+    <div class="row-end">
+      <button class="btn ghost" value="cancel" type="submit">Close</button>
+      <button class="btn primary" id="settings-save" value="save" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

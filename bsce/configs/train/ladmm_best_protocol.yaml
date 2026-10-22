@@ -1,0 +1,33 @@
+# Training protocol of the user's best SV UPA LADMM (untitled2.py -> Trained_LADMM_for_SV_UPA_2561280to20dB_1_11dB_better.pt,
+# test NMSE -9.52 / -17.59 / -20.17 dB at 0 / 10 / 20 dB with ONE network for 0-20 dB). Every value below was read from
+# untitled2.py and confirmed by the checkpoint (4 refinements, stages stopping at exactly 100000 iterations, shortest
+# stage 6000 iterations = better_wait 5000, last weights kept, loss and validation = pooled linear NMSE).
+#   layer-wise: [H_t, rho_t] at lr, then all parameters so far at lr*{0.5, 0.2, 0.1, 0.01}; [theta_t] at lr, then all
+#   no warm start (every new layer starts at H = inv(A^T A + I), rho = theta = alpha = 1)
+#   torch.optim.Adam, float32 / complex64, batch 400 drawn with replacement, validation every 10 steps on the whole
+#   validation set, round(nmse, 5), stop when the best is older than 5000 steps, at most 100000 steps per stage
+# Use with any LADMM config:  --train configs/train/ladmm_original.yaml --protocol ladmm_best
+model:
+  precision: float32
+  init_precision: untitled2    # la.inv(A32.T @ A32 + np.eye(N)): float32 product, float64 inverse, cast to float32
+train:
+  noise: file                  # every method: training noise from the measurement files (same noise for all)
+  schedule: borgerding
+  grad_clip: null             # no clipping for every method (NF-LADMM configs set 1.0 for their own end-to-end training)
+  lr: 5.0e-4
+  refinements: [0.5, 0.2, 0.1, 0.01]
+  maxit: 100000
+  better_wait: 5000
+  ivl: 10
+  check_mult: 100
+  batch_size: 400
+  loss: nmse
+  val_metric: nmse
+  val_round: 5
+  val_round_mode: python       # nmse.item() then round(nmse, 5)
+  warm_start: false
+  refine_name: index
+  optimizer: adam_torch
+  restore_best: false
+  val_mean_db: false
+  val_groups: 1

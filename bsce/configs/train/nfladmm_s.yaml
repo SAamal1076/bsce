@@ -1,0 +1,21 @@
+# NF-LADMM-S (NF-LADMM_proposal.md): exact noise-folded x-step (A^+, no N x N inverse), learned prior
+#   denoiser conv = radial shrinkage + shared circular CNN (1-D k9 ULA / 2-D 5x5 UPA, 16 channels)
+# one network for the whole SNR band (sigma_t from the residual + the known noise variance), trained end to end as in
+# the proposal's pilot: Adam, cosine decay 1e-3 -> 5e-5, gradient clipping 1, batch 128, loss = mean per-sample log-NSE,
+# fresh noise every minibatch (SNR ~ U(band) per sample); validation every 500 steps, best state kept.
+# The pilot used 2,000 CPU steps; 30,000 steps is the full-scale default (GPU). Depth: scripts/select_depth.py.
+model: {model: NF-LADMM, T: 8, denoiser: conv, share_cnn: true, hidden: 16, sigma: known, precision: float32}
+train:
+  schedule: steps
+  steps: 30000
+  lr: 1.0e-3
+  lr_final_frac: 0.05
+  grad_clip: 1.0
+  batch_size: 128
+  loss: log_nse
+  val_metric: nmse
+  val_round: null
+  val_every: 500
+  restore_best: true
+  optimizer: adam_torch
+  noise: online

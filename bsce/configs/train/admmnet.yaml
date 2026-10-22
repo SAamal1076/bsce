@@ -1,0 +1,10 @@
+# ADMM-Net (Klioui) with the THADMM-Net training loop (end-to-end Adam, epochs)
+model: {model: ADMM-Net, T: 15, beta: 0.1, rho: 1.0, precision: float32}
+train:
+  schedule: end2end
+  lr: 1.0e-4
+  epochs: 30
+  batch_size: 2048
+  loss: nmse
+  val_round: null
+  optimizer: adam_torch

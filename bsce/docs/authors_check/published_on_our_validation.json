@@ -1,0 +1,250 @@
+[
+ {
+  "network": "GM-LAMP DeepMIMO_ULA 0to10dB",
+  "logged_val_db": -21.343039,
+  "our_val_db": -21.585,
+  "diff_db": -0.242,
+  "boot_sd_db": 0.077,
+  "z": -2.22,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "0": -13.165,
+   "5": -18.908
+  }
+ },
+ {
+  "network": "GM-LAMP DeepMIMO_ULA 10to20dB",
+  "logged_val_db": -21.4752,
+  "our_val_db": -21.649,
+  "diff_db": -0.174,
+  "boot_sd_db": 0.04,
+  "z": -3.1,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "10": -21.564,
+   "15": -26.583,
+   "20": -29.457
+  }
+ },
+ {
+  "network": "GM-LAMP DeepMIMO_UPA 0to10dB",
+  "logged_val_db": -20.861861,
+  "our_val_db": -20.891,
+  "diff_db": -0.029,
+  "boot_sd_db": 0.051,
+  "z": -0.4,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "0": -13.158,
+   "5": -18.138
+  }
+ },
+ {
+  "network": "GM-LAMP DeepMIMO_UPA 10to20dB",
+  "logged_val_db": -21.307683,
+  "our_val_db": -21.358,
+  "diff_db": -0.05,
+  "boot_sd_db": 0.045,
+  "z": -0.79,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "10": -21.275,
+   "15": -25.86,
+   "20": -28.806
+  }
+ },
+ {
+  "network": "GM-LAMP SV_ULA 0to10dB",
+  "logged_val_db": -16.259853,
+  "our_val_db": -16.029,
+  "diff_db": 0.231,
+  "boot_sd_db": 0.115,
+  "z": 1.42,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "0": -9.19,
+   "5": -13.727
+  }
+ },
+ {
+  "network": "GM-LAMP SV_ULA 10to20dB",
+  "logged_val_db": -16.798537,
+  "our_val_db": -16.76,
+  "diff_db": 0.038,
+  "boot_sd_db": 0.064,
+  "z": 0.42,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "10": -16.764,
+   "15": -20.806,
+   "20": -22.929
+  }
+ },
+ {
+  "network": "GM-LAMP SV_UPA 0to10dB",
+  "logged_val_db": -14.355707,
+  "our_val_db": -14.35,
+  "diff_db": 0.006,
+  "boot_sd_db": 0.052,
+  "z": 0.08,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "0": -8.468,
+   "5": -12.612
+  }
+ },
+ {
+  "network": "GM-LAMP SV_UPA 10to20dB",
+  "logged_val_db": -15.05428,
+  "our_val_db": -15.209,
+  "diff_db": -0.155,
+  "boot_sd_db": 0.056,
+  "z": -1.96,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "10": -15.077,
+   "15": -18.558,
+   "20": -20.331
+  }
+ },
+ {
+  "network": "LAMP DeepMIMO_ULA 0to10dB",
+  "logged_val_db": -20.443122,
+  "our_val_db": -20.562,
+  "diff_db": -0.119,
+  "boot_sd_db": 0.05,
+  "z": -1.68,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "0": -12.767,
+   "5": -17.356
+  }
+ },
+ {
+  "network": "LAMP DeepMIMO_ULA 10to20dB",
+  "logged_val_db": -20.788339,
+  "our_val_db": -20.957,
+  "diff_db": -0.168,
+  "boot_sd_db": 0.037,
+  "z": -3.22,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "10": -20.772,
+   "15": -25.553,
+   "20": -28.929
+  }
+ },
+ {
+  "network": "LAMP DeepMIMO_UPA 0to10dB",
+  "logged_val_db": -19.222688,
+  "our_val_db": -19.241,
+  "diff_db": -0.018,
+  "boot_sd_db": 0.045,
+  "z": -0.29,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "0": -11.892,
+   "5": -16.167
+  }
+ },
+ {
+  "network": "LAMP DeepMIMO_UPA 10to20dB",
+  "logged_val_db": -19.496202,
+  "our_val_db": -19.561,
+  "diff_db": -0.065,
+  "boot_sd_db": 0.038,
+  "z": -1.21,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "10": -19.537,
+   "15": -23.96,
+   "20": -27.06
+  }
+ },
+ {
+  "network": "LAMP SV_ULA 0to10dB",
+  "logged_val_db": -14.654662,
+  "our_val_db": -14.635,
+  "diff_db": 0.02,
+  "boot_sd_db": 0.05,
+  "z": 0.28,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "0": -8.621,
+   "5": -12.293
+  }
+ },
+ {
+  "network": "LAMP SV_ULA 10to20dB",
+  "logged_val_db": -16.29672,
+  "our_val_db": -16.333,
+  "diff_db": -0.036,
+  "boot_sd_db": 0.059,
+  "z": -0.44,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "10": -16.315,
+   "15": -19.89,
+   "20": -21.916
+  }
+ },
+ {
+  "network": "LAMP SV_UPA 0to10dB",
+  "logged_val_db": -13.023348,
+  "our_val_db": -13.114,
+  "diff_db": -0.091,
+  "boot_sd_db": 0.049,
+  "z": -1.3,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "0": -7.619,
+   "5": -10.996
+  }
+ },
+ {
+  "network": "LAMP SV_UPA 10to20dB",
+  "logged_val_db": -14.710833,
+  "our_val_db": -14.767,
+  "diff_db": -0.056,
+  "boot_sd_db": 0.057,
+  "z": -0.71,
+  "val_snr": [
+   10.0
+  ],
+  "test_db": {
+   "10": -14.647,
+   "15": -18.057,
+   "20": -19.993
+  }
+ }
+]

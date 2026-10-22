@@ -1,0 +1,25 @@
+# End-to-end protocol for ANY method: all layers trained together from the start (no layer-wise stages).
+# Use:  --protocol e2e   (train.py / run_all.py / select_depth.py)
+#   Adam (PyTorch), learning rate cosine-decayed from lr to lr * lr_final_frac over `steps` minibatches,
+#   gradient-norm clipping, validation every val_every steps, best validated weights kept at the end.
+#   The model (operator, T, precision ...) comes from the train config the protocol is applied to.
+# Change any value with --set, e.g. --set train.steps=50000 train.lr=5e-4 train.loss=log_nse
+model:
+  precision: float32           # every method in float32
+train:
+  noise: file                  # every method: training noise from the measurement files (same noise for all)
+  schedule: steps
+  steps: 30000
+  lr: 1.0e-3
+  lr_final_frac: 0.05
+  grad_clip: 1.0
+  batch_size: 256
+  loss: nmse
+  val_metric: nmse
+  val_round: null
+  val_every: 500
+  restore_best: true
+  optimizer: adam_torch
+  warm_start: false
+  val_mean_db: false
+  val_groups: 1
