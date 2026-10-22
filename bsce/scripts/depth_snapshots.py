@@ -15,7 +15,8 @@ evaluates every T on the scenario's test channels with exactly the noise of eval
                            (bottom) validation NMSE logged when layer T was finished + gain of each added layer
   depth_curve.csv          run, T, n_params, validation, test NMSE at every SNR, mean
   depth_curve.md           the same as a table, with the flat point of every run
-Flat point: the smallest T whose mean test NMSE is within --tol dB of the best T of that run.
+Flat point (v31.3): the smallest T whose VALIDATION NMSE is within --tol dB of the best T of that run. The depth is
+chosen on validation data, never on the test set; the test curves are shown for the record only.
 """
 import argparse
 import json
@@ -89,7 +90,8 @@ def evaluate_run(run, band, dev):
 
 
 def flat_point(rows, tol):
-    m = np.array([r["mean"] for r in rows])
+    """(smallest T within tol dB of the best validation NMSE, best T), from the validation NMSE of each snapshot."""
+    m = np.array([r["val_db"] for r in rows])
     ok = [r["T"] for r, v in zip(rows, m) if v <= m.min() + tol]
     return min(ok), rows[int(np.argmin(m))]["T"]
 
@@ -125,7 +127,7 @@ def main():
         for row in allrows:
             f.write(",".join(f"{row.get(c, '')}" if not isinstance(row.get(c), float) else f"{row[c]:.4f}"
                              for c in cols) + "\n")
-    md = [f"# Depth curve (test NMSE in dB; flat point = smallest T within {a.tol:g} dB of the best mean)\n"]
+    md = [f"# Depth curve (test NMSE in dB; flat point = smallest T within {a.tol:g} dB of the best VALIDATION NMSE)\n"]
     for r, sc, b, snr, rows in res:
         fT, bT = flat_point(rows, a.tol)
         md.append(f"\n## {sc['name']} / {r.name} / band {b}: best T = {bT}, flat from T = {fT}\n")

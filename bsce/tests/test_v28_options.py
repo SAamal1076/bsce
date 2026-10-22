@@ -94,6 +94,9 @@ def test_whitened_step_is_the_exact_folded_step(setup):
         if op == "diagprior":
             with torch.no_grad():
                 m.P("d_0").fill_(-80.0)
+        if op == "psd":                               # v31.3 init: a small random block beyond the first M columns
+            with torch.no_grad():
+                m.P("L_0")[:, A.shape[0]:].zero_()
         with torch.no_grad():
             x1 = m.forward_stages(torch.as_tensor(y), upto=0)[0].numpy()
         tol = 1e-6 if op == "kron" else 1e-9          # kron: nearest Kronecker factorisation of the init

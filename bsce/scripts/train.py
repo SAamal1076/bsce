@@ -69,6 +69,10 @@ def model_tag(mcfg):
         t += "-" + mcfg.get("operator", "full")
         if mcfg.get("threshold", "scalar") != "scalar":
             t += "-" + mcfg["threshold"]
+        if mcfg.get("noise_level", "median") != "median":
+            t += "-" + mcfg["noise_level"]
+        if mcfg.get("debias", "none") != "none":
+            t += "-debias"
     if t == "NF-LADMM":
         t += "-S" if mcfg.get("denoiser", "conv") == "conv" else "-C"
         if mcfg.get("sigma", "known") != "known":
@@ -214,6 +218,13 @@ def main():
         mcfg.setdefault("noise_model", nm)             # the exact data step of the data's noise model
         if noise_models.canonical(mcfg["noise_model"]) != nm:
             print(f"[bsce] NOTE: NF-LADMM data step for {mcfg['noise_model']} noise on {nm} data (mismatch on purpose)")
+    if mcfg["model"] in ("LADMM", "Graph-LADMM") and nm == "white":
+        step = mcfg.get("data_step", "whitened" if mcfg["model"] == "Graph-LADMM" else "plain")
+        if step == "whitened":          # A^+ y, P: exact for y = A (x + n); on white noise it amplifies the noise
+            print(f"[bsce] WARNING: {mcfg['model']} data_step 'whitened' is the step of folded noise y = A (x + n), but "
+                  f"the data are white (y = A x + w): about 1-2 dB lost (docs/NOISE_MODELS.md). Use "
+                  f"--set model.data_step=plain" + (" (Graph-LADMM plain has no TV z-step)" if mcfg["model"] ==
+                                                    "Graph-LADMM" else ""))
     if mcfg["model"] == "ALISTA" and mcfg.get("W") is None:
         wf = data / "ALISTA_W.mat"
         if not wf.exists():
@@ -244,9 +255,14 @@ def main():
     log = {"scenario": sc, "config": {k: v for k, v in cfg.items()}, "device": describe(dev), "bands": {}}
     if logf.exists():                                   # keep the bands trained by earlier calls (--bands / --snr)
         try:
-            log["bands"] = json.loads(logf.read_text(encoding="utf-8")).get("bands", {})
+            old = json.loads(logf.read_text(encoding="utf-8"))
         except ValueError:
-            pass
+            old = {}
+        same = lambda c: json.dumps(c, sort_keys=True, default=str)                          # noqa: E731
+        if old.get("config") is not None and same(old["config"]) != same(json.loads(same(log["config"]))):
+            sys.exit(f"{outdir} holds a network trained with another configuration (its train_log.json 'config' "
+                     f"differs): give this run its own folder with --tag, or move that folder")
+        log["bands"] = old.get("bands", {})
     noise = cfg["train"].get("noise", "file")
     for bi, band in enumerate(bands):
         s2t = s2v = None
@@ -318,7 +334,9 @@ def main():
         ck = outdir / "checkpoints" / f"{tag}_{band['name']}_{fp}"
         layer_cb = None
         if a.save_layers:
-            per = max(1, len(model.stage_plan()) // max(1, int(getattr(model, "T", 1))))   # LADMM: 2 outputs per layer
+            tail = int(getattr(model, "tail_outputs", 0))               # LADMM debias: one output after the last layer
+            n_out, T_full = len(model.stage_plan()), max(1, int(getattr(model, "T", 1)))
+            per = max(1, (n_out - tail) // T_full)                     # LADMM: 2 outputs per layer
             if tcfg.schedule in ("end2end", "steps"):
                 sys.exit(f"--save-layers: the schedule '{tcfg.schedule}' trains all layers together, so there is nothing "
                          "to save per layer (the run would only make the full-depth network). Use a layer-wise protocol "
@@ -326,9 +344,12 @@ def main():
                          "ladmm6, ...), or leave --save-layers out.")
 
             def layer_cb(out, net, nmse_db, _band=band, _per=per, _t0=time.time()):
-                if (out + 1) % _per:
-                    return
-                t = (out + 1) // _per
+                if out >= n_out - tail:                                # the tail: the full network
+                    t = T_full
+                elif (out + 1) % _per or (tail and (out + 1) // _per == T_full):
+                    return                                             # (with a tail, layer T is saved after it)
+                else:
+                    t = (out + 1) // _per
                 sub = truncate_model(net, t)
                 p_, _ = save_model(sub, outdir / "layers" / f"T{t:02d}_{tag}_{_band['name']}",
                                    train_state={"layer_nmse_db": [nmse_db]},

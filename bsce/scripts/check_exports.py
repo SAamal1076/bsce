@@ -20,6 +20,7 @@ import scipy.io as sio
 import torch
 
 ROOT = Path(__file__).resolve().parent.parent
+MATLAB_FAMILIES = ("lamp", "ladmm", "lista", "alista", "lvamp", "admmnet")   # the models matlab/bsce_infer.m runs
 sys.path.insert(0, str(ROOT))
 from bsce.config import load_yaml, resolve, scenario_cs_matrix, scenario_test_dir  # noqa: E402
 from bsce.export import load_model  # noqa: E402
@@ -48,9 +49,14 @@ def main():
     y = measurements.gen_measurements_matlab(x, A, 10.0, NumpyMatlabRNG(1))
     results = {}
     for pt in sorted(runs.glob("*/*.pt")):
-        net = load_model(pt)
-        if getattr(net, "family", "") == "nfladmm":
-            print(f"{pt.relative_to(runs)}: NF-LADMM has no MATLAB inference (Python only) -> skipped")
+        try:
+            net = load_model(pt)
+        except Exception as e:                       # noqa: BLE001
+            print(f"{pt.relative_to(runs)}: cannot load ({e}) -> skipped")
+            continue
+        fam = getattr(net, "family", "")
+        if fam not in MATLAB_FAMILIES:
+            print(f"{pt.relative_to(runs)}: {fam or type(net).__name__} has no MATLAB inference (Python only) -> skipped")
             continue
         with torch.no_grad():
             ref = net(torch.as_tensor(y)).cpu().numpy()
@@ -68,10 +74,16 @@ def main():
                     cmd = [a.matlab, "-batch", code + f"save('{tdp}/out.mat', 'xh');"]
                 else:
                     cmd = [a.octave, "--no-gui", "--quiet", "--eval", code + f"save('-v7', '{tdp}/out.mat', 'xh');"]
-                subprocess.run(cmd, check=True, capture_output=True)
-                xo = sio.loadmat(Path(td) / "out.mat")["xh"]
-                r["octave_vs_torch_native"] = rel(xo, ref)
-                r["octave_vs_torch_f64"] = rel(xo, ref64)
+                pr = subprocess.run(cmd, capture_output=True, text=True)
+                if pr.returncode:                    # e.g. a LADMM option that bsce_ladmm.m refuses (Python only)
+                    msg = [m for m in (pr.stderr or pr.stdout).strip().splitlines() if m.strip()]
+                    err = next((m for m in msg if "error:" in m), msg[-1] if msg else f"exit {pr.returncode}")
+                    r["matlab"] = "refused: " + err.split("error:", 1)[-1].strip()
+                else:
+                    xo = sio.loadmat(Path(td) / "out.mat")["xh"]
+                    r["octave_vs_torch_native"] = rel(xo, ref)
+                    r["octave_vs_torch_f64"] = rel(xo, ref64)
+                    r["matlab"] = "OK" if r["octave_vs_torch_f64"] < 1e-4 else "FAIL (differs from Python)"
         orig = pt.parent / (pt.stem + "_orig.mat")
         r["has_orig_mat"] = orig.exists()
         results[str(pt.relative_to(runs))] = r

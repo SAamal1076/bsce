@@ -57,7 +57,7 @@ def promote(run: Path, T: int, force: bool):
         save_model(net, dst / f"{name}_{band}", train_state=ck.get("train_state"), data_info=info)
         b = log["bands"].get(band, {})
         b.update(T=T, final_val_nmse_db=info.get("val_nmse_db"), n_params=net.n_params(),
-                 layer_nmse_db=(lambda v: v[: (len(v) // Tfull if Tfull and len(v) >= Tfull else 2) * T])(
+                 layer_nmse_db=(lambda v: v if T == Tfull else v[: (len(v) // Tfull if Tfull and len(v) >= Tfull else 2) * T])(
                      b.get("layer_nmse_db", [])) if b.get("layer_nmse_db") else [],   # outputs per layer: 2 LADMM/LAMP, 1 others
                  files=[str(dst / f"{name}_{band}.pt")])
         if "train_seconds" in b and info.get("seconds_since_start") is not None:

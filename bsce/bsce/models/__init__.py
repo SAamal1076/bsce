@@ -22,6 +22,7 @@ REGISTRY = {
                                 threshold=c.get("threshold", "scalar"), group_kappa=c.get("group_kappa", 3.0),
                                 group_win=c.get("group_win", 3), array=c.get("array", "UPA"),
                                 data_step=c.get("data_step", "plain"), gm_K=c.get("gm_K", 4),
+                                noise_level=c.get("noise_level", "median"), debias=c.get("debias", "none"),
                                 precision=c.get("precision", "float32")),
     "LISTA": lambda A, c: LISTA(A, T=c.get("T", 16), lam=c.get("lam", 0.4), untied=c.get("untied", True),
                                 complex_mode=c.get("complex_mode", True), precision=c.get("precision", "float32")),

@@ -134,12 +134,12 @@ options:
 ## check_env.py
 
 ```
-bsce folder : /home/claude/work21/bsce
-bsce version: 31.2 (bsce_code_31_2, 19 Oct 2026)
+bsce folder : /tmp/claude-0/-home-user-Test-Claude/6577dea0-61db-5c4e-9d80-60f901d1339d/scratchpad/code/fix
+bsce version: 31.3 (bsce_code_31_3, 22 Oct 2026)
 python      : 3.13.16 (Linux)
 
 packages
-  [OK] numpy 2.5.3
+  [OK] numpy 2.5.4
   [OK] scipy 1.18.1
   [OK] yaml 6.0.3
   [OK] matplotlib 3.11.2
@@ -158,10 +158,10 @@ reference files (bsce_reference_part*.zip)
 data sets (MANUAL.md section 3)
   [OK] data/SV_ULA
   [OK] data/SV_UPA
-  [OK] data/DeepMIMO_ULA
-  [OK] data/DeepMIMO_UPA
-  [OK] data/3GPP_UPA (optional)
-  [OK] data/3GPP_ULA (optional)
+  [--] data/DeepMIMO_ULA   -> python scripts/make_gmlamp_data.py --sv --deepmimo-ula <H_ula.mat> --deepmimo-upa <H_upa.mat>
+  [--] data/DeepMIMO_UPA   -> python scripts/make_gmlamp_data.py --sv --deepmimo-ula <H_ula.mat> --deepmimo-upa <H_upa.mat>
+  [--] data/3GPP_UPA (optional)   -> python scripts/make_3gpp_data.py
+  [--] data/3GPP_ULA (optional)   -> python scripts/make_3gpp_data.py
 
 ready.
 ```
@@ -549,7 +549,8 @@ evaluates every T on the scenario's test channels with exactly the noise of eval
                            (bottom) validation NMSE logged when layer T was finished + gain of each added layer
   depth_curve.csv          run, T, n_params, validation, test NMSE at every SNR, mean
   depth_curve.md           the same as a table, with the flat point of every run
-Flat point: the smallest T whose mean test NMSE is within --tol dB of the best T of that run.
+Flat point (v31.3): the smallest T whose VALIDATION NMSE is within --tol dB of the best T of that run. The depth is
+chosen on validation data, never on the test set; the test curves are shown for the record only.
 
 options:
   -h, --help            show this help message and exit
@@ -1327,10 +1328,16 @@ METHODS    <key>[T]; the number is the number of layers, default = the method's 
              nfladmmsr NF-LADMM-SR (suggested: CNN denoiser + over-relaxed update + slope init 2)   T = 4
              utrr      UTRR (Wu-Cheng-Eldar-Cioffi, TCOM 2025; top-K 16 in the last layer) T = 30
                        (not in 'all': name it; with its own training: --protocol paper)
+             ladmmat   LADMM + noise-adaptive soft threshold, blind noise level (median) per channel     T = 6
+             ladmmatr  LADMM-AT with the noise level from the previous layer's whitened residual       T = 6
+             ladmmatrd LADMM-ATR + a least-squares debias layer on a soft support (3 parameters)       T = 6
+                       (v31.3; not in 'all': name them; full operator and training as ladmm)
            LADMM model options (--set, or a method row's own settings in the workbench), v28:
              model.threshold=adaptive|firm|gm   noise-adaptive shrinkage (blind noise level per channel)
              model.data_step=whitened           exact data step of the folded noise y = A (x + n)
              model.operator=analytic|analytic1  (A^T A + rho I)^-1 by SVD, 3 / 2 parameters per layer
+             model.noise_level=residual         (v31.3, with adaptive|firm|gm) noise level from the previous residual
+             model.debias=ls                    (v31.3) least-squares debias layer after the last layer
            e.g. ladmm4, lamp6, lista12.  'all' = every method at its default depth.
 PROTOCOL   --protocol ladmm_best (default, the same for every method) | gmlamp_best | gmlamp | fair | e2e |
            paper (each method's own training settings)          -> configs/train/<name>_protocol.yaml
@@ -1724,6 +1731,7 @@ options:
 usage: tune_classical.py [-h] --scenario SCENARIO [--snr [SNR ...]]
                          [--n-val N_VAL] [--methods METHODS] [--smoke]
                          [--out OUT]
+                         [--noise-model {colored,coloured,folded,white}]
 
 Tune the classical l1 ADMM and graph-reweighted l1 (v31) per test SNR on validation channels, for evaluate.py.
 
@@ -1739,13 +1747,17 @@ noise of evaluate.py uses seed + 1000 + i). Writes a JSON {snr: {lam_l1, val_l1_
 About 2-3 min per SNR on one CPU core with 300 channels.
 
 options:
-  -h, --help           show this help message and exit
+  -h, --help            show this help message and exit
   --scenario SCENARIO
-  --snr [SNR ...]      test SNRs to tune (default: the scenario's)
+  --snr [SNR ...]       test SNRs to tune (default: the scenario's)
   --n-val N_VAL
   --methods METHODS
   --smoke
-  --out OUT            default results/classical_params_<SCENARIO>.json
+  --out OUT             default results/classical_params_<SCENARIO>.json
+                        (_white.json for white)
+  --noise-model {colored,coloured,folded,white}
+                        validation noise (v31.3): tune for the noise model the
+                        comparison uses
 ```
 
 ## utrr_reproduce.py

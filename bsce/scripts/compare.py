@@ -221,7 +221,8 @@ def main():
         if a.polish != "none":
             cmd += ["--polish", a.polish]
         if {"l1", "grwl1"} & set(a.classical.split(",")):          # v31: the tuned classical baselines
-            cmd += ["--classical-params", str(resolve(a.classical_params.replace("<SCENARIO>", sc["name"])))]
+            name = sc["name"] + ("_white" if nm == "white" and "<SCENARIO>" in a.classical_params else "")
+            cmd += ["--classical-params", str(resolve(a.classical_params.replace("<SCENARIO>", name)))]
         run(cmd)
         with open(res / scenario_run_name(sc) / "nmse_vs_snr.csv", encoding="utf-8") as f:
             rows = list(csv.DictReader(f))

@@ -46,8 +46,8 @@
  },
  "LADMM-psd": {
   "n_stages": 16,
-  "param_abs_sum": 5397.858562912783,
-  "val_nmse": 0.2909678854672661
+  "param_abs_sum": 6279.100350193324,
+  "val_nmse": 0.29377658933147727
  },
  "LAMP": {
   "n_stages": 16,

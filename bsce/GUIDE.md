@@ -200,8 +200,10 @@ The results go to `results/depth/`.
   - Bottom: the validation NMSE logged when each layer finished, plus the gain of each added layer.
   - All values are printed on the curves.
 - **`depth_curve.csv` and `depth_curve.md`:** the same numbers, plus the "flat point".
-  - The flat point is the smallest T within 0.1 dB of the best mean test NMSE. `--tol 0.2` changes the threshold.
-- **Choose T on more than the pooled mean.** Pooled validation is dominated by low SNR. Look at the 20 dB curve too: on DeepMIMO, extra layers kept helping at high SNR.
+  - The flat point is the smallest T within 0.1 dB of the best **validation** NMSE (v31.3; before, the test mean). `--tol 0.2` changes the threshold.
+- **Choose T on validation data, never on the test curves** (that would tune the proposed methods on the test set while the
+  baselines keep their papers' depth). The test curves are shown for the record. Pooled validation is dominated by low SNR:
+  to weigh high SNR, use `select_depth.py` (validation per band) rather than the 20 dB test curve.
 
 ### 3.3 Use the chosen depth without retraining
 ```

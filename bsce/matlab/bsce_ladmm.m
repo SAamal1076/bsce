@@ -1,6 +1,12 @@
 function [xhat, layers] = bsce_ladmm(net, y)
 % LADMM inference (same equations as LADMM_test.m; structured operators are exported
-% materialised as H_matrix_t, so every LADMM variant runs through this function).
+% materialised as H_matrix_t, so every operator runs through this function). The threshold options other
+% than 'scalar', data_step 'whitened', noise_level and debias run in Python only: refused here, never approximated.
+opt = @(f, d) isfield(net, f) && ~strcmp(strtrim(char(net.(f))), d);
+if opt('cfg_threshold', 'scalar') || opt('cfg_data_step', 'plain') || opt('cfg_noise_level', 'median') ...
+    || opt('cfg_debias', 'none')
+  error('bsce_ladmm: this LADMM (threshold / data_step / noise_level / debias option) runs in Python only');
+end
 A = double(net.A); [M, N] = size(A); T = net.T;
 Z = zeros(N, size(y,2)); U = Z; AHy = A'*y;
 layers = cell(1, T);

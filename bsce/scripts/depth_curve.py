@@ -24,7 +24,10 @@ ROOT = Path(__file__).resolve().parent.parent
 def per_layer(vals, T):
     """layer_nmse_db has one entry per network output; keep the last output of each layer."""
     k = max(1, len(vals) // T)
-    return vals[k - 1::k][:T]
+    out = list(vals[k - 1::k][:T])
+    if len(vals) > k * T and out:     # outputs after the last layer (LADMM debias): the full network is the last one
+        out[-1] = vals[-1]
+    return out
 
 
 def main():

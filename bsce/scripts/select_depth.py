@@ -78,7 +78,8 @@ def main():
             cfg = merge(cfg, load_yaml(ROOT / f"configs/train/{a.protocol}_protocol.yaml"))
         cfg = apply_overrides(cfg, a.set)
         mcfg = dict(cfg["model"])
-        base = model_tag(mcfg) + ("" if a.protocol == "original" else f"_{a.protocol}")
+        base = (f"{model_tag(mcfg)}_{Path(cpath).stem}" + ("" if a.protocol == "original" else f"_{a.protocol}")
+                + "".join(f"_{s.replace('=', '-').replace('.', '-')}" for s in a.set))   # one folder per config + options
         layerwise = cfg["train"].get("schedule", "borgerding") in ("borgerding", "alista")
         runs = [(max(Ts), f"{base}-T{max(Ts)}")] if layerwise else [(T, f"{base}-T{T}") for T in Ts]
         for T, tag in runs:

@@ -28,10 +28,16 @@ METHODS    <key>[T]; the number is the number of layers, default = the method's 
              nfladmmsr NF-LADMM-SR (suggested: CNN denoiser + over-relaxed update + slope init 2)   T = 4
              utrr      UTRR (Wu-Cheng-Eldar-Cioffi, TCOM 2025; top-K 16 in the last layer) T = 30
                        (not in 'all': name it; with its own training: --protocol paper)
+             ladmmat   LADMM + noise-adaptive soft threshold, blind noise level (median) per channel     T = 6
+             ladmmatr  LADMM-AT with the noise level from the previous layer's whitened residual       T = 6
+             ladmmatrd LADMM-ATR + a least-squares debias layer on a soft support (3 parameters)       T = 6
+                       (v31.3; not in 'all': name them; full operator and training as ladmm)
            LADMM model options (--set, or a method row's own settings in the workbench), v28:
              model.threshold=adaptive|firm|gm   noise-adaptive shrinkage (blind noise level per channel)
              model.data_step=whitened           exact data step of the folded noise y = A (x + n)
              model.operator=analytic|analytic1  (A^T A + rho I)^-1 by SVD, 3 / 2 parameters per layer
+             model.noise_level=residual         (v31.3, with adaptive|firm|gm) noise level from the previous residual
+             model.debias=ls                    (v31.3) least-squares debias layer after the last layer
            e.g. ladmm4, lamp6, lista12.  'all' = every method at its default depth.
 PROTOCOL   --protocol ladmm_best (default, the same for every method) | gmlamp_best | gmlamp | fair | e2e |
            paper (each method's own training settings)          -> configs/train/<name>_protocol.yaml
@@ -121,8 +127,11 @@ METHODS = {
     "nfladmmc": ("NF-LADMM-C", "configs/train/nfladmm_c.yaml", 8),
     "nfladmmsr": ("NF-LADMM-SR", "configs/train/nfladmm_sr.yaml", 4),
     "utrr": ("UTRR", "configs/train/utrr.yaml", 30),
+    "ladmmat": ("LADMM-AT", "configs/train/ladmm_at.yaml", 6),          # v31.3: adaptive threshold (median noise level)
+    "ladmmatr": ("LADMM-ATR", "configs/train/ladmm_atr.yaml", 6),       # v31.3: + residual noise level
+    "ladmmatrd": ("LADMM-ATRD", "configs/train/ladmm_atrd.yaml", 6),    # v31.3: + debias layer
 }
-NOT_IN_ALL = {"utrr", "cadmm", "gladmm", "gladmmf", "gladmmany", "gladmmmix", "gladmmbp", "gladmmrw", "gladmmrwtv"}   # 'all' = the methods of the default suite (as before v28); UTRR and CADMM only when named
+NOT_IN_ALL = {"ladmmat", "ladmmatr", "ladmmatrd", "utrr", "cadmm", "gladmm", "gladmmf", "gladmmany", "gladmmmix", "gladmmbp", "gladmmrw", "gladmmrwtv"}   # 'all' = the methods of the default suite (as before v28); UTRR and CADMM only when named
 # v30: the analytic Graph-LADMM networks (56 parameters) train with their own end-to-end settings whatever --protocol is
 # (check of 18 Oct, SV ULA: GM-LAMP's layer-wise procedure at the same budget lost 1.7 dB against end to end). Their
 # folders are then <label>-T<T>_paper, as with --protocol paper. --force-protocol gives them --protocol as well.

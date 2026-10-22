@@ -44,7 +44,7 @@ def read_csv(folder: Path):
     cols = {k: np.array([float(r[k]) if r[k] not in ("", None) else np.nan for r in rows]) for k in rows[0] if k != "SNR_dB"}
     groups = OrderedDict()
     for k in cols:
-        groups.setdefault(re.sub(r"_s\d+$", "", k), []).append(cols[k])
+        groups.setdefault(re.sub(r"_s\d+(?=(\+polish(-snr)?)?$)", "", k), []).append(cols[k])   # '<run>_s1+polish' too
     stats = {g: (np.nanmean(v, 0), np.nanstd(v, 0, ddof=1) if len(v) > 1 else np.zeros(len(snr)), len(v))
              for g, v in groups.items()}
     return snr, stats

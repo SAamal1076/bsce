@@ -27,6 +27,7 @@ sys.path.insert(0, str(ROOT))
 from bsce import classical  # noqa: E402
 from bsce.config import load_yaml, resolve, scenario_cs_matrix, scenario_data_dir  # noqa: E402
 from bsce.data import measurements  # noqa: E402
+from bsce.data import noise as noise_models  # noqa: E402
 from bsce.rng import NumpyMatlabRNG  # noqa: E402
 
 LAM = list(np.logspace(-2.5, 0.5, 13))
@@ -43,7 +44,9 @@ def main():
     ap.add_argument("--n-val", type=int, default=300)
     ap.add_argument("--methods", default="l1,grwl1")
     ap.add_argument("--smoke", action="store_true")
-    ap.add_argument("--out", default=None, help="default results/classical_params_<SCENARIO>.json")
+    ap.add_argument("--out", default=None, help="default results/classical_params_<SCENARIO>.json (_white.json for white)")
+    ap.add_argument("--noise-model", default="colored", choices=["colored", "coloured", "folded", "white"],
+                    help="validation noise (v31.3): tune for the noise model the comparison uses")
     a = ap.parse_args()
     sc = load_yaml(a.scenario)
     A = sio.loadmat(scenario_cs_matrix(sc, a.smoke))["A"].astype(np.float64)
@@ -52,14 +55,16 @@ def main():
     array, N1, N2 = sc.get("array", "ULA"), int(sc.get("N1", 16)), int(sc.get("N2", 16))
     snrs = sc["test_snr_db"] if a.snr is None else a.snr
     methods = [m for m in a.methods.split(",") if m]
-    out = resolve(a.out) if a.out else resolve("results") / f"classical_params_{sc['name']}.json"
+    noise = noise_models.canonical(a.noise_model)
+    out = resolve(a.out) if a.out else resolve("results") / (f"classical_params_{sc['name']}"
+                                                            f"{'_white' if noise == 'white' else ''}{'_smoke' if a.smoke else ''}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     res = json.loads(out.read_text()) if out.exists() else {}
     P = np.linalg.inv(A.T @ A + np.eye(A.shape[1]))
     for snr in snrs:
         t0 = time.time()
         i = list(sc["test_snr_db"]).index(snr) if snr in sc["test_snr_db"] else int(round(snr))
-        yv = measurements.gen_measurements_matlab(xv, A, snr, NumpyMatlabRNG(int(sc["seed"]) + 9000 + i))
+        yv = measurements.gen_measurements_matlab(xv, A, snr, NumpyMatlabRNG(int(sc["seed"]) + 9000 + i), noise_model=noise)
         sco = sorted((nm(classical.l1_admm(yv, A, l_, P=P), xv), l_) for l_ in LAM)
         l0 = sco[0][1]
         sco += [(nm(classical.l1_admm(yv, A, l0 * f, P=P), xv), l0 * f) for f in (0.65, 1.5)]

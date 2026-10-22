@@ -1,4 +1,4 @@
-# bsce code map: what is where, and how the pieces fit (v31.2)
+# bsce code map: what is where, and how the pieces fit (v31.3)
 
 The **GUIDE** says what to run, in order. This page says **what each part of the code does**, so you can read it,
 change it, or find where an option is handled.
@@ -87,7 +87,15 @@ The defaults (in bold) are your original scripts.
 | `operator` (H_t) | **`full`**, `diag`, `lowrank`, `kron` (your A/B/C scripts); `psd`, `kronprior`, `diagprior` (exact ADMM with a learned prior); v28: `analytic` (LADMM-A, 3 parameters per layer), `analytic1` (α = 1) | `__init__` (parameters), `_apply_op`, `H_matrix` |
 | `threshold` (D_t) | **`scalar`** (soft, θ_t/ρ_t); `group`, `group_k`, `group_kc`; v28: `adaptive`, `firm`, `gm` (blind noise level σ̂ = median\|w\|/√ln 2) | `_shrink`, `_group_weights`, `shrinkage.py` |
 | `data_step` (b) | **`plain`** (Aᵀy, exact for white noise); v28: `whitened` (A⁺y, exact for y = A(x+n); AᵀA → P everywhere) | `__init__` (buffers `Apinv`, `AtA`), `forward_stages` |
+| `noise_level` (σ̂ of adaptive / firm / gm) | **`median`** (median\|V\|/√ln2, blind); v31.3: `residual` (‖W(y − A z_{t−1})‖/√M, W = (AAᵀ)^−1/2; layer 1: median) | `_residual_level`, `_shrink`, `forward_stages` |
+| `debias` (after z_T) | **`none`**; v31.3: `ls` (least squares on a soft support of z_T, 3 parameters κ, τ, ε ≥ 1e-4; one M×M solve per channel; trained in a last stage; Python only) | `_debias`, `stage_plan`, `tail_outputs` |
 | `T`, `untied`, `rank`, `N1`, `N2`, `gm_K`, `precision`, `init_precision` | depth, tying, low-rank rank, UPA grid, GM components, float32/64 | `__init__` |
+
+**The three v31.3 methods** (`run_suite.py`; full operator and the training of `ladmm`; not in `all`, name them):
+`ladmmat` = LADMM-AT (`threshold: adaptive`), `ladmmatr` = LADMM-ATR (+ `noise_level: residual`), `ladmmatrd` = LADMM-ATRD
+(+ `debias: ls`); configs `configs/train/ladmm_at*.yaml`. With `--save-layers`, the snapshots of layers t < T are z_t without
+the debias layer; the T-layer snapshot (the full network) is saved after the debias stage. MATLAB (`bsce_ladmm.m`) refuses
+these networks, and every other non-default LADMM option, instead of computing a wrong estimate.
 
 ### Graph-LADMM, layer by layer (`graph_ladmm.py`, v29)
 

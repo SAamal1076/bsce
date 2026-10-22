@@ -182,7 +182,8 @@ def plot(figs, res):
     import matplotlib.pyplot as plt
     methods = list(dict.fromkeys(c[0] for _, cs in figs for c in cs if c[0] not in CLASSICAL))
     color = {m: PALETTE[i % len(PALETTE)] for i, m in enumerate(methods)}
-    color.update({"amp": "#7a7a7a", "omp": "#5a5a5a", "sd": "#3a3a3a", "admm": "#9a9a9a"})
+    color.update({"amp": "#7a7a7a", "omp": "#5a5a5a", "sd": "#3a3a3a", "admm": "#9a9a9a", "l1": "#b0b0b0",
+                  "grwl1": "#4a4a4a"})
     fig, axs = plt.subplots(len(figs), 3, figsize=(24, 6.4 * len(figs)), squeeze=False,
                             gridspec_kw=dict(width_ratios=[1.25, 1.25, 0.85]))
     for r, (name, curves) in enumerate(figs):

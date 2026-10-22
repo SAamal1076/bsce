@@ -5,10 +5,12 @@ cm = ~isfield(net, 'cfg_complex_mode') || double(net.cfg_complex_mode) ~= 0;
 rj = zeros(N, size(y,2));
 taurj = sum(abs(y).^2, 1)/N;
 yvar = exp(double(net.logyvar));
+w = rS2;                                  % white noise: LMMSE weights; colored (folded) noise: ones (lvamp.py)
+if isfield(net, 'cfg_noise_model') && ~strcmp(strtrim(char(net.cfg_noise_model)), 'white'), w = ones(size(rS2)); end
 ytilde = UsT*y; layers = cell(1, T);
 for t = 0:T-1
   varRat = yvar./taurj;
-  scale_each = 1./(1 + rS2*varRat);
+  scale_each = 1./(1 + w*varRat);
   zetai = N./sum(scale_each, 1);
   adjust = bsxfun(@times, scale_each.*(ytilde - V.'*rj), zetai);
   ri = rj + V*adjust;

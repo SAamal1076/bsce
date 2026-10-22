@@ -24,7 +24,7 @@ and whole training loops are compared. The numbers are in `VERIFICATION_REPORT.m
 - the fair comparison.
 
 Reference documents:
-- [CODE_MAP.md](CODE_MAP.md): what each part of the code does and where every option is handled (v31.2).
+- [CODE_MAP.md](CODE_MAP.md): what each part of the code does and where every option is handled (v31.3).
 - [MANUAL.md](MANUAL.md): every script, option, method, schedule and protocol in detail.
 - [DATA_GUIDE.md](DATA_GUIDE.md): the GM-LAMP data sets in detail.
 - [docs/3GPP_DATASET.md](docs/3GPP_DATASET.md): the 3GPP TR 38.901 data sets (sizes, configuration, checks).
@@ -34,6 +34,9 @@ Reference documents:
   have a one-Gaussian denoiser and must be retrained (`CHANGES_2026-10-18_v31_1_gmlamp_fix.md`, `scripts/check_gm_components.py`).
   **v31.2:** `run_suite.py --save-layers` runs a list that mixes layer-wise and end-to-end methods
   (`CHANGES_2026-10-19_v31_2_save_layers_mixed.md`).
+  **v31.3:** two code reviews (`docs/REVIEW_2026-10-21.md`), the new methods `ladmmat`, `ladmmatr`, `ladmmatrd`
+  (noise-adaptive threshold, residual noise level, debias layer) and their pilot results
+  (`CHANGES_2026-10-22_v31_3.md`).
 
 ## 1. Install (conda; Windows commands, the same work on Linux/macOS)
 

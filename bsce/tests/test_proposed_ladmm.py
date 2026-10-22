@@ -42,6 +42,8 @@ def test_reduces_to_admm(op, lam, rho, record):
                 m.P(f"L1_{t}").zero_(); m.P(f"L2_{t}").zero_()
             if op == "diagprior":
                 m.P(f"d_{t}").fill_(-80.0)          # softplus(-80) ~ 1.8e-35
+            if op == "psd":                         # v31.3 init: a small random block beyond the first M columns
+                m.P(f"L_{t}")[:, A.shape[0]:].zero_()
     with torch.no_grad():
         z = m(torch.as_tensor(y)).numpy()
     zr, _ = classical.admm(y, A, lam, rho, T, 0.0)

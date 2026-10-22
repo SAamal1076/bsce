@@ -289,7 +289,8 @@ def set_args(v):
 METHOD_INFO = {   # one line per method key: what it is, what to know, its model options (key=value in its settings)
     "ladmm": "proposed; full N×N operator per layer. Options: model.operator=diag|lowrank|kron|psd|kronprior|diagprior|"
              "analytic|analytic1, model.threshold=scalar|group|group_k|group_kc|adaptive|firm|gm, "
-             "model.data_step=plain|whitened",
+             "model.data_step=plain|whitened; v31.3 (with adaptive|firm|gm): model.noise_level=median|residual, "
+             "model.debias=none|ls",
     "lamp": "Borgerding; Wei–Hu–Dai, soft threshold. Option: model.untied=false",
     "gmlamp": "Wei–Hu–Dai, Gaussian-mixture shrinkage. Options: model.K=4, model.gm_init=spread. v31.1: the identical components of the original init are separated before training (train.gm_symmetry); retrain GM-LAMP networks from older versions (check_gm_components.py)",
     "lista": "complex LISTA, one shared B. Option: model.untied=false",
@@ -321,6 +322,12 @@ METHOD_INFO = {   # one line per method key: what it is, what to know, its model
     "nfladmm": "proposed, CNN denoiser; gets the true noise variance unless model.sigma=residual",
     "nfladmmc": "proposed, radial denoiser (160 parameters); true noise variance unless model.sigma=residual",
     "nfladmmsr": "proposed, CNN prior + over-relaxed update; true noise variance unless model.sigma=residual",
+    "ladmmat": "v31.3: LADMM + noise-adaptive soft threshold c_t·σ̂, σ̂ = median|V|/√ln2 per channel (blind); "
+               "same parameters as LADMM. 2-layer pilot (SV UPA, 1000 channels): +3.2 dB at 0 dB, +0.9 dB at 20 dB",
+    "ladmmatr": "v31.3: LADMM-AT with σ̂ from the previous layer's whitened residual ||W(y − A z)||/√M (layer 1: median); "
+                "meant for less sparse channels (DeepMIMO, 3GPP); about equal to LADMM-AT on SV",
+    "ladmmatrd": "v31.3: LADMM-ATR + a least-squares debias layer on a soft support of z_T (3 parameters, one M×M "
+                 "solve per channel; Python only, no _orig.mat)",
     "utrr": "Wu–Cheng–Eldar–Cioffi 2025; its own training: protocol 'paper'. Options: model.K=16, model.bn=true",
 }
 

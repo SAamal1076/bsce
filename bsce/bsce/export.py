@@ -69,7 +69,8 @@ def original_format_dict(model):
     if model.family == "lamp":
         return model.mat_dict()
     if model.family == "ladmm":
-        if getattr(model, "data_step", "plain") != "plain" or model.threshold != "scalar":
+        if getattr(model, "data_step", "plain") != "plain" or model.threshold != "scalar" \
+                or getattr(model, "debias", "none") != "none":
             return None                 # LADMM_test.m computes A^T y and the scalar soft threshold only
         d = model.mat_dict()
         keep = ("H_matrix_", "rho_", "theta_", "alpha_")
@@ -107,6 +108,8 @@ def truncate_model(model, T):
     """The first T layers of an unrolled network as a T-layer network (same weights, same output as
     model.forward_stages(y)[2T-1] for LADMM). Used to save the network as it is when layer T is finished."""
     cfg = dict(model.cfg)
+    if int(T) < int(cfg.get("T", T)):
+        cfg.pop("debias", None)     # LADMM: the debias layer belongs after the last layer (trained last)
     cfg["T"] = int(T)
     if model.family == "alista":
         cfg["W"] = model.W.cpu().numpy()

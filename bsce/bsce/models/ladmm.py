@@ -17,7 +17,8 @@ Operators (names of the TF variables are kept):
             row-major vec (the script's docstring says H1 kron H2; the code is reproduced).
 
 Proposed variants (not in the original code), keeping exact ADMM semantics:
-  psd       : H_t = (G_t + rho_t I)^-1, G_t = L_t L_t^T, L_t (N x N) init [A^T | 0]   (G=A^T A)
+  psd       : H_t = (G_t + rho_t I)^-1, G_t = L_t L_t^T, L_t (N x N) init [A^T | 1e-3 R], R ~ N(0, 1) (v31.3: a zero
+              block would never train)  (G = A^T A + 1e-6 R R^T at init)
   kronprior : H_t = (A^T A + rho_t I + (L1 L1^T) kron (L2 L2^T))^-1   (UPA prior, 2*N1^2 params)
   diagprior : H_t = (A^T A + rho_t I + diag(softplus(d_t)))^-1
   For these, rho_t = softplus(rho_raw_t) > 0 and theta_t = softplus(theta_raw_t) >= 0.
@@ -34,7 +35,7 @@ Threshold (option, not in the original code; default 'scalar' = the scripts):
              level: with a sparse channel most entries of V are noise); c_t = softplus(theta_raw_t), init 1
              (v28; the noise-adaptive threshold of LAMP / TISTA)              no extra parameter
   firm     : firm (MCP) shrinkage: 0 below t1 = c_t sigma_hat, a ramp, identity above t2 = t1 (1 + softplus(k_t)),
-             so the strong beams are not biased (init t2 = 2 t1)            +1 parameter / layer
+             so the strong beams are not biased (init c_t = 2, t2 = 2 t1)   +1 parameter / layer
   gm       : MMSE shrinkage of a gm_K-component complex Gaussian mixture (exact density exp(-|v|^2/s)/(pi s),
              zero means) in noise of variance (c_t sigma_hat)^2; weights and variances learned per layer, init
              w = .80/.12/.05/.03, nu = 1e-3/.5/5/50 (channels of mean power 1, as every bsce data set)
@@ -49,6 +50,20 @@ Data step (option, v28; default 'plain' = the scripts):
              becomes P: init of full / diag / lowrank / kron (P + I)^-1, psd L_0 = [A^T (A A^T)^-1/2 | 0],
              kronprior / diagprior / analytic use P. No extra parameter. A free H cannot reproduce this step from
              A^T y (12-40 % step error on SV ULA), so the option changes the model class.
+
+Noise level (option noise_level, v31.3; default 'median' = v28):
+  median   : sigma_hat = median_i |V_i| / sqrt(ln 2) (blind, see 'adaptive')
+  residual : sigma_hat^2 = ||W (y - A z_{t-1})||^2 / M per channel, W = (A A^T)^-1/2 (the whitened residual of the
+             previous layer, as Graph-LADMM's sigma='residual'); layer 1 has no z yet and uses the median.
+             For the threshold options adaptive / firm / gm only. No extra parameter.
+
+Debias layer (option debias, v31.3; default 'none'): after z_T, a least-squares correction on a soft support
+  r = W (y - A z_T),  s^2 = ||r||^2 / M,  m = sigmoid(kappa (|z_T| - tau s) / s)        (soft support, 0..1)
+  x = z_T + D d,  d = argmin ||r - B D d||^2 + eps ||d||^2 = D B^T (B D^2 B^T + eps I)^-1 r,  D = diag(m), B = W A
+  (one M x M solve per channel)
+  kappa, tau softplus, eps = softplus + 1e-4 (init 4, 3, 0.1): 3 parameters, trained in a last stage. m -> 0 gives
+  x = z_T. A snapshot of the first t < T layers (truncate_model, --save-layers) is z_t without this layer.
+  Python only (no _orig.mat).
 
 Analytic operators (v28; combiner-agnostic, no matrix is learned):
   analytic  : H_t = (G + rho_t I)^-1, G = A^T A (plain) or P (whitened), applied through the thin SVD of A
@@ -77,6 +92,8 @@ NOISE_THRESHOLDS = ("adaptive", "firm", "gm")       # v28: threshold scale x bli
 ANALYTIC = ("analytic", "analytic1")                # v28: (G + rho I)^-1, nothing learned in the operator
 PROPOSED = ("psd", "kronprior", "diagprior") + ANALYTIC
 DATA_STEPS = ("plain", "whitened")
+NOISE_LEVELS = ("median", "residual")              # v31.3
+DEBIAS = ("none", "ls")                            # v31.3
 GOLD = (1 + 5 ** 0.5) / 2
 
 
@@ -108,12 +125,18 @@ class LADMM(UnrolledNet):
                  N1: int = 16, N2: int = 16, init_precision: Optional[str] = None,
                  lowrank_init_scale: float = 0.01, prior_init: float = 0.1,
                  threshold: str = "scalar", group_kappa: float = 3.0, group_win: int = 3, array: str = "UPA",
-                 data_step: str = "plain", gm_K: int = 4, precision: str = "float64", device=None):
+                 data_step: str = "plain", gm_K: int = 4, noise_level: str = "median", debias: str = "none",
+                 precision: str = "float64", device=None):
         super().__init__(A, precision)
         assert operator in FAITHFUL + PROPOSED, operator
         assert threshold in THRESHOLDS, threshold
         assert data_step in DATA_STEPS, data_step
+        assert noise_level in NOISE_LEVELS, noise_level
+        assert debias in DEBIAS, debias
+        if noise_level != "median" and threshold not in NOISE_THRESHOLDS:
+            raise ValueError(f"noise_level '{noise_level}' needs a noise threshold {NOISE_THRESHOLDS}, not '{threshold}'")
         self.data_step, self.gm_K = data_step, int(gm_K)
+        self.noise_level, self.debias = noise_level, debias
         self._rho_soft = operator in PROPOSED
         self._theta_soft = operator in PROPOSED or threshold in NOISE_THRESHOLDS
         self.threshold, self.group_kappa, self.group_win, self.array = threshold, group_kappa, group_win, array.upper()
@@ -126,6 +149,10 @@ class LADMM(UnrolledNet):
             self.cfg["data_step"] = data_step
         if threshold == "gm":
             self.cfg["gm_K"] = self.gm_K
+        if noise_level != "median":              # v31.3 keys only when used
+            self.cfg["noise_level"] = noise_level
+        if debias != "none":
+            self.cfg["debias"] = debias
         N, M = self.N, self.M
         Anp = self.A_np
         white = data_step == "whitened"
@@ -179,6 +206,9 @@ class LADMM(UnrolledNet):
                     self._p(f"H1_{t}", K1); self._p(f"H2_{t}", K2); names = [f"H1_{t}", f"H2_{t}"]
                 elif operator == "psd":
                     L0 = np.zeros((N, N)); L0[:, :M] = Anp.T @ iSq if white else Anp.T
+                    # v31.3: the other N - M columns small but non-zero (exactly zero they never get a gradient,
+                    # since d(L L^T)/dL = (G + G^T) L, and G_t would stay of rank M)
+                    L0[:, M:] = 1e-3 * np.random.default_rng(1000 + t).standard_normal((N, N - M))
                     self._p(f"L_{t}", L0); names = [f"L_{t}"]
                 elif operator == "kronprior":
                     self._p(f"L1_{t}", prior_init * np.eye(N1)); self._p(f"L2_{t}", prior_init * np.eye(N2))
@@ -187,8 +217,8 @@ class LADMM(UnrolledNet):
                     self._p(f"d_{t}", np.full(N, _softplus_inv(prior_init))); names = [f"d_{t}"]
             self._op_names.append(names if (names or operator in ANALYTIC) else self._op_names[0])
             self._p(f"rho_raw_{t}" if self._rho_soft else f"rho_{t}", _softplus_inv(1.0) if self._rho_soft else 1.0)
-            if self._theta_soft:
-                self._p(f"theta_raw_{t}", np.array([_softplus_inv(1.0)]))
+            if self._theta_soft:                  # v31.3: firm starts at c = 2 (at c = 1 its ramp, slope 2, amplifies)
+                self._p(f"theta_raw_{t}", np.array([_softplus_inv(2.0 if threshold == "firm" else 1.0)]))
             else:
                 self._p(f"theta_{t}", np.array([1.0]))
             if operator == "analytic":
@@ -206,8 +236,33 @@ class LADMM(UnrolledNet):
             if threshold == "group_kc":
                 shape = (group_win, group_win) if self.array == "UPA" else (group_win,)
                 self._p(f"kern_raw_{t}", np.full(shape, _softplus_inv(1.0)))
+        if self._needs_whitener:
+            self._set_whitener(Anp, register=True)
+        if debias == "ls":
+            self._p("debias_kappa_raw", _softplus_inv(4.0))
+            self._p("debias_tau_raw", _softplus_inv(3.0))
+            self._p("debias_eps_raw", _softplus_inv(0.1))
         if device is not None:
             self.to(device)
+
+    @property
+    def tail_outputs(self) -> int:
+        """Outputs after the last layer's z_T (the debias layer): 0 or 1."""
+        return int(self.debias != "none")
+
+    @property
+    def _needs_whitener(self) -> bool:
+        return self.noise_level == "residual" or self.debias != "none"
+
+    def _set_whitener(self, A: np.ndarray, register: bool = False):
+        """Wm = (A A^T)^-1/2 and Aw = Wm A: the whitened residual Wm (y - A z) has white noise for y = A (x + n)."""
+        ev, U = la.eigh(A @ A.T)
+        Wm = (U / np.sqrt(ev)) @ U.T
+        for name, v in (("Wm", Wm), ("Aw", Wm @ A)):
+            if register:
+                self.register_buffer(name, torch.tensor(v, dtype=self.rdtype))
+            else:
+                self._put_buffer(name, v)
 
     # -- combiner (v29) ----------------------------------------------------------------
     def set_combiner(self, A):
@@ -225,6 +280,8 @@ class LADMM(UnrolledNet):
         put = self._put_buffer
         self.M, self.A_np = A.shape[0], A
         put("A", A)
+        if self._needs_whitener:
+            self._set_whitener(A)
         if white:
             ev, Ue = la.eigh(A @ A.T)
             Apinv = A.T @ (Ue / ev) @ Ue.T
@@ -254,10 +311,16 @@ class LADMM(UnrolledNet):
     def _alpha_name(self, t):
         return {"analytic": f"alpha_raw_{t}", "analytic1": None}.get(self.operator, f"alpha_{t}")
 
-    def _shrink(self, t: int, V: torch.Tensor, rho: torch.Tensor) -> torch.Tensor:
+    def _residual_level(self, yw: torch.Tensor, Z: torch.Tensor) -> torch.Tensor:
+        """sigma_hat of every column from the whitened residual: sqrt(||W y - W A z||^2 / M), shape (1, B)."""
+        r = yw - rmm(self.Aw, Z)
+        return torch.sqrt(torch.mean(torch.real(r) ** 2 + torch.imag(r) ** 2, dim=0, keepdim=True).clamp_min(1e-20))
+
+    def _shrink(self, t: int, V: torch.Tensor, rho: torch.Tensor, sig: Optional[torch.Tensor] = None) -> torch.Tensor:
         if self.threshold in NOISE_THRESHOLDS:
             c = self.theta(t).reshape(-1)[0]
-            sig = beam_noise_level(V)                               # (1, B)
+            if sig is None:
+                sig = beam_noise_level(V)                           # (1, B)
             if self.threshold == "adaptive":
                 return csoft_ladmm(V, c * sig)
             if self.threshold == "firm":
@@ -368,15 +431,20 @@ class LADMM(UnrolledNet):
             stages.append(Stage(f"LADMM-soft Z-update T={t + 1}", "nonlinear", [th_name] + extra, list(allv)))
             if self._alpha_name(t):
                 allv.append(self._alpha_name(t))
+        if self.debias == "ls":
+            new = ["debias_kappa_raw", "debias_tau_raw", "debias_eps_raw"]
+            allv += new
+            stages.append(Stage("LADMM debias", "nonlinear", new, list(allv)))
         for i, st in enumerate(stages):
             st.index = i
         return stages
 
     def forward_stages(self, y, upto: Optional[int] = None):
         y = self.as_complex(y)
-        n_st = 2 * self.T if upto is None else upto + 1
+        n_st = 2 * self.T + (self.debias != "none") if upto is None else upto + 1
         B = y.shape[1]
         Ay = rmm(self.Apinv, y) if self.data_step == "whitened" else rmm(self.A.T, y)
+        yw = rmm(self.Wm, y) if self._needs_whitener else None
         Z = torch.zeros((self.N, B), dtype=self.cdtype, device=y.device)
         U = torch.zeros_like(Z)
         outs = []
@@ -389,12 +457,30 @@ class LADMM(UnrolledNet):
             if len(outs) >= n_st:
                 return outs
             V = H + U / rho_c
-            Z = self._shrink(t, V, rho)
+            sig = self._residual_level(yw, Z) if (self.noise_level == "residual" and t > 0) else None
+            Z = self._shrink(t, V, rho, sig)
             outs.append(Z)
             if len(outs) >= n_st:
                 return outs
             U = U + self.alpha(t).to(self.cdtype) * rho_c * (H - Z)
+        if self.debias == "ls":
+            outs.append(self._debias(yw, Z))
         return outs
+
+    def _debias(self, yw: torch.Tensor, Z: torch.Tensor) -> torch.Tensor:
+        """Least squares on the soft support m of z_T (Woodbury: one M x M solve per channel)."""
+        r = yw - rmm(self.Aw, Z)                                                     # (M, B) complex
+        s = torch.sqrt(torch.mean(torch.real(r) ** 2 + torch.imag(r) ** 2, dim=0, keepdim=True)).clamp_min(1e-8)
+        kappa, tau, eps = (F.softplus(self.P(f"debias_{k}_raw")) for k in ("kappa", "tau", "eps"))
+        eps = eps + 1e-4                   # floor: B D^2 B^T has rank ~ support size < M (float32 breaks below ~1e-7)
+        m = torch.sigmoid(kappa * (torch.abs(Z) - tau * s) / s)                      # (N, B) real
+        Bw, m2 = self.Aw, m ** 2
+        G = torch.einsum("mn,nb,kn->bmk", Bw, m2, Bw)                            # B D^2 B^T per channel
+        G = G + eps * torch.eye(self.M, dtype=G.dtype, device=G.device)
+        rhs = torch.stack([torch.real(r).T, torch.imag(r).T], dim=-1)                # (B, M, 2)
+        sol = torch.linalg.solve(G, rhs)                                             # (B, M, 2)
+        d = m2 * (Bw.T @ sol[..., 0].T), m2 * (Bw.T @ sol[..., 1].T)                 # D (D B^T (.))
+        return Z + torch.complex(d[0], d[1]).to(Z.dtype)
 
     # -- export -----------------------------------------------------------------------
     def mat_dict(self):
