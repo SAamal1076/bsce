@@ -1,0 +1,6 @@
+# only for re-running the comparisons with the ORIGINAL code (tests/test_*_vs_*.py):
+tensorflow>=2.15        # CPU build is enough; runs the original TF1 graphs through tf.compat.v1
+scikit-learn            # imported by the ALISTA repository's utils/data.py
+pillow
+tqdm
+# + GNU Octave (octave-cli) for the original .m files: on PATH, or its full path in BSCE_OCTAVE

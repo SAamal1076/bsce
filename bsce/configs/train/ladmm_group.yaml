@@ -1,0 +1,4 @@
+# LADMM-full with the ADMM-Improved group threshold in every layer (kappa = 3, 3x3 window on the UPA
+# beam grid, 3 beams for the ULA; no extra parameters). The beam grid follows the scenario's array.
+_base: ladmm_original.yaml
+model: {threshold: group}

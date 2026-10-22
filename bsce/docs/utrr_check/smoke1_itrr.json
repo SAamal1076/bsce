@@ -1,0 +1,58 @@
+{
+ "ITRR, rho=0.1": {
+  "iterations": 4000,
+  "median_final": 1.7077485271886914e-07,
+  "best": 2.402171714527044e-16,
+  "worst": 0.008059777311764379,
+  "exact_below_1e20": 0,
+  "n": 40
+ },
+ "ITRR, rho=1": {
+  "iterations": 4000,
+  "median_final": 6.934824008679489e-30,
+  "best": 1.7791331746361856e-30,
+  "worst": 0.0066642021839818716,
+  "exact_below_1e20": 27,
+  "n": 40
+ },
+ "ITRR-BB, rho=0.1": {
+  "iterations": 4000,
+  "median_final": 1.707707416479185e-07,
+  "best": 6.107142946713756e-30,
+  "worst": 0.008059776326704867,
+  "exact_below_1e20": 19,
+  "n": 40
+ },
+ "ITRR-BB, rho=1": {
+  "iterations": 4000,
+  "median_final": 0.0005625086661612572,
+  "best": 3.334683447058543e-32,
+  "worst": 0.026052855315302947,
+  "exact_below_1e20": 7,
+  "n": 40
+ },
+ "PGD-BB Lasso (lambda 1e-3)": {
+  "iterations": 4000,
+  "median_final": 3.0705188941480533e-07,
+  "best": 4.1643011668625446e-08,
+  "worst": 7.801765065570638e-06,
+  "exact_below_1e20": 0,
+  "n": 40
+ },
+ "PGD-BB ridge (lambda 1e-3)": {
+  "iterations": 4000,
+  "median_final": 0.49715676793076213,
+  "best": 0.4321715481639768,
+  "worst": 0.5894507842804025,
+  "exact_below_1e20": 0,
+  "n": 40
+ },
+ "ITRR, printed sign of grad F": {
+  "iterations": 60,
+  "median_final": 64695679674585.94,
+  "best": 4610242725952.437,
+  "worst": 439917381996757.5,
+  "exact_below_1e20": 0,
+  "n": 40
+ }
+}

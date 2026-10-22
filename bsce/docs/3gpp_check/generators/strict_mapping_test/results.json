@@ -1,0 +1,56 @@
+{
+ "ULA_Y QuaDRiGa default angles + fixes": {
+  "beams95_median": 99.0,
+  "p10": 8.0,
+  "p90": 142.0,
+  "los": 18.0,
+  "nlos": 116.0,
+  "top1": 0.29446754097218786,
+  "n": 2000
+ },
+ "ULA_Y QuaDRiGa strict TR angles + fixes": {
+  "beams95_median": 63.0,
+  "p10": 6.0,
+  "p90": 127.0,
+  "los": 14.0,
+  "nlos": 93.0,
+  "top1": 0.3146943561636397,
+  "n": 2000
+ },
+ "UPA QuaDRiGa default angles + fixes": {
+  "beams95_median": 24.0,
+  "p10": 10.0,
+  "p90": 48.0,
+  "los": 21.0,
+  "nlos": 26.0,
+  "top1": 0.3863709724419819,
+  "n": 2000
+ },
+ "UPA QuaDRiGa strict TR angles + fixes": {
+  "beams95_median": 29.0,
+  "p10": 10.0,
+  "p90": 54.0,
+  "los": 21.0,
+  "nlos": 34.0,
+  "top1": 0.393353524750387,
+  "n": 2000
+ },
+ "ULA_Y Sionna (first 2000)": {
+  "beams95_median": 63.0,
+  "p10": 6.0,
+  "p90": 118.0,
+  "los": 13.0,
+  "nlos": 86.0,
+  "top1": 0.3135739037672233,
+  "n": 2000
+ },
+ "UPA Sionna (first 2000)": {
+  "beams95_median": 17.0,
+  "p10": 8.0,
+  "p90": 38.0,
+  "los": 19.0,
+  "nlos": 16.0,
+  "top1": 0.41322757115504294,
+  "n": 2000
+ }
+}

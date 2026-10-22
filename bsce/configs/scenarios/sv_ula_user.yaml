@@ -1,0 +1,19 @@
+# SV ULA with YOUR data in data/SV (the files untitled2.py trained on): ONE network for 0-20 dB.
+#   data/SV/SV_ULA_training_channel.mat, SV_ULA_validation_channel.mat              (your generate_channel*.m)
+#   data/SV/SV_ULA_training_128_measurements_0to20dB.mat                               (100 chunks, SNR ~ U(0,20))
+#   data/SV/SV_ULA_validation_128_measurements_1_11dB.mat                              (name kept from your files; generate_SV_data.py
+#                                                                                         draws its SNRs ~ U(0,20) in 100 chunks, n=[1_11] is 111)
+# Missing measurement files: python scripts/make_sv_measurements.py --scenario configs/scenarios/sv_ula_user.yaml
+# Test: the 2000 SV ULA test channels of data/SV_ULA (same test set as every other bsce result, GM-LAMP generator).
+_base: sv_ula.yaml
+name: SV_ULA_user
+data_dir: data/SV
+test_data_dir: data/SV_ULA
+n_snr_chunks: 100
+bands:
+  - {name: 0to20dB, train: [0, 20], val_range: [0, 20], val_name: 1_11dB, use_for: [0, 20.01]}
+# models looked up by evaluate.py / import_gmlamp_weights.py: a 0-20 dB network if the folder has one, else a 0-10 / 10-20 pair
+eval_bands:
+  - {name: 0to20dB,  use_for: [0, 20.01]}
+  - {name: 0to10dB,  use_for: [0, 10]}
+  - {name: 10to20dB, use_for: [10, 20.01]}

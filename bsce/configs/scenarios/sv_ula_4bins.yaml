@@ -1,0 +1,7 @@
+# Same as sv_ula.yaml but with the 4 SNR bands used for LADMM in the draft (for reproduction).
+_base: sv_ula.yaml
+bands:
+  - {name: 0to5dB,   train: [0, 5],   val_snr: [1],  use_for: [0, 5]}
+  - {name: 5to10dB,  train: [5, 10],  val_snr: [6],  use_for: [5, 10]}
+  - {name: 10to15dB, train: [10, 15], val_snr: [11], use_for: [10, 15]}
+  - {name: 15to20dB, train: [15, 20], val_snr: [16], use_for: [15, 20.01]}

@@ -1,0 +1,20 @@
+# Saleh-Valenzuela, UPA 16 x 16, lens array, N_RF=16, Q=8 -> M=128 (Wei-Hu-Dai setting)
+name: SV_UPA
+dataset: SV
+array: UPA
+N1: 16            # N = N1*N2 = 256 antennas (ULA uses N1*N2 elements)
+N2: 16
+L: 3
+M: 128
+cs_matrix: reference/gmlamp/CE_SV/CSmatrix256128.mat   # same A as the GM-LAMP code
+data_dir: data/SV_UPA
+seed: 2026
+n_train: 80000
+n_val: 2000
+n_test: 2000
+n_snr_chunks: 10          # genMeasurements(): training set split into chunks of random SNR
+# SNR bands: one trained network per band (GM-LAMP: 0-10 and 10-20 dB, validated at 10 dB)
+bands:
+  - {name: 0to10dB,  train: [0, 10],  val_snr: [10], use_for: [0, 10]}
+  - {name: 10to20dB, train: [10, 20], val_snr: [10], use_for: [10, 20.01]}
+test_snr_db: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]

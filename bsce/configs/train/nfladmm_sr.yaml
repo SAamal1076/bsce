@@ -1,0 +1,28 @@
+# Suggested NF-LADMM ("NF-LADMM-SR": structured prior + relaxed update; NF-LADMM_proposal.md, NF-LADMM_theory.md, NF-LADMM_convergence.md), T = 4:
+#   x-step   : exact prox of the noise-folded likelihood, x = v + beta A^+ (y - A v)  (no N x N matrix, O(MN))
+#   update   : relax = over-relaxed ADMM / relaxed Douglas-Rachford (lam_t in (0, 2)), u = w - z
+#   prior    : radial shrinkage (slope logits +-2, not saturated) + shared circular CNN
+#              (1-D kernel 9 for the ULA, 2-D 5x5 on the 16 x 16 beam grid for the UPA), 16 channels, FiLM on log sigma
+#   sigma_t  : residual estimate + known noise variance
+# One network for the band given with --snr (run_suite.py: 0 20), end to end:
+#   Adam, cosine decay 1e-3 -> 5e-5, gradient clip 1, batch 128, loss = mean per-sample log-NSE,
+#   fresh noise every minibatch (SNR ~ U(band) per sample), validation every 500 steps on fixed-noise validation
+#   channels (pooled NMSE), best validated state kept.
+# These train settings are used with run_suite.py --protocol paper (each method its own settings). With the default
+# --protocol ladmm_best they are replaced by the common protocol, exactly as for every other method.
+model: {model: NF-LADMM, T: 4, denoiser: conv, share_cnn: true, hidden: 16, sigma: known, update: relax,
+        slope_init: 2.0, precision: float32}
+train:
+  schedule: steps
+  steps: 30000
+  lr: 1.0e-3
+  lr_final_frac: 0.05
+  grad_clip: 1.0
+  batch_size: 128
+  loss: log_nse
+  val_metric: nmse
+  val_round: null
+  val_every: 500
+  restore_best: true
+  optimizer: adam_torch
+  noise: online

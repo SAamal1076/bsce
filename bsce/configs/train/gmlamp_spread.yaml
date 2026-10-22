@@ -1,0 +1,8 @@
+# GM-LAMP as gmlamp_original.yaml, but with a deterministic spread of the initial mixture
+# components (means and log-variances offset by 1e-3*linspace(-1,1,K)).
+# Why: with the original initial value all K components are identical, the gradient that
+# separates them is zero in exact arithmetic and the components split only through
+# round-off amplified by Adam, so the trained network depends on hardware / library
+# (TF-CPU vs TF-GPU vs PyTorch). See VERIFICATION_REPORT.md, section "GM-LAMP symmetry".
+_base: gmlamp_original.yaml
+model: {model: GM-LAMP, T: 8, K: 4, untied: true, precision: float64, gm_init: spread, gm_spread: 1.0e-3}

@@ -1,0 +1,9 @@
+# GM-LAMP's protocol (gmlamp_protocol.yaml) with two changes, for the "improved" runs:
+#   restore_best: every stage ends with the best validated weights (original: last weights)
+#   val_mean_db : validation value = mean in dB over the validation SNRs of the band
+#                 (use a scenario whose bands have several val_snr, e.g. made by scripts/make_scenario.py)
+_base: gmlamp_protocol.yaml
+train:
+  noise: file                  # every method: training noise from the measurement files (same noise for all)
+  restore_best: true
+  val_mean_db: true

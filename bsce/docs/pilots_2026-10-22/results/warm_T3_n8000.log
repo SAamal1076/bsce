@@ -1,0 +1,4 @@
+LADMM, cold start      0 dB=  -5.53  4 dB= -10.14  8 dB= -12.45  12 dB= -13.42  16 dB= -13.84  20 dB= -14.03  train= -13.46  validation= -11.82  iters=48000  rho=[0.343, 1.354, 1.548]  436s
+LADMM, warm start      0 dB=  -5.27  4 dB=  -9.86  8 dB= -12.25  12 dB= -13.27  16 dB= -13.69  20 dB= -13.88  train= -13.12  validation= -11.61  iters=46000  rho=[0.297, 0.906, 1.164]  397s
+LADMM-AT, cold start   0 dB=  -7.10  4 dB= -10.17  8 dB= -12.57  12 dB= -14.06  16 dB= -14.84  20 dB= -15.20  train= -13.30  validation= -12.40  iters=47000  rho=[0.489, 1.533, 1.605]  472s
+LADMM-AT, warm start   0 dB=  -6.96  4 dB= -10.04  8 dB= -12.44  12 dB= -13.96  16 dB= -14.75  20 dB= -15.13  train= -13.12  validation= -12.24  iters=47000  rho=[0.46, 1.196, 1.401]  473s

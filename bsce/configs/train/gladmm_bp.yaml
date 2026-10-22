@@ -1,0 +1,20 @@
+# Graph-LADMM (v31) with the beam prior: the gate logit gets + beta_t l_i, l_i the log of beam i's mean power relative
+# to the mean (from the training channels, learned, shared by the layers), beta_t per layer (init 0). 318 parameters at
+# T = 8 on N = 256. Check of 18 Oct (3,000 steps): +0.30 dB on DeepMIMO ULA, +0.42 dB on DeepMIMO UPA, +0.03 dB on SV ULA,
+# -0.12 dB on SV UPA. The prior is in the beam domain, so the network still follows any combiner.
+model: {model: Graph-LADMM, T: 8, zstep: gtv_gate, xstep: analytic, beam_prior: gate, sigma: residual, edge_phase: data,
+        lr_mult: 10.0, precision: float32}
+train:
+  schedule: steps
+  steps: 30000
+  lr: 1.0e-3
+  lr_final_frac: 0.05
+  grad_clip: 1.0
+  batch_size: 256
+  loss: log_nse
+  val_metric: nmse
+  val_round: null
+  val_every: 500
+  restore_best: true
+  optimizer: adam_torch
+  noise: online

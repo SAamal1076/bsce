@@ -1,0 +1,3 @@
+# LADMM-full with the group threshold and kappa_t learned per layer (init 3, +1 parameter per layer).
+_base: ladmm_original.yaml
+model: {threshold: group_k}

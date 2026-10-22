@@ -1,0 +1,19 @@
+# Graph-LADMM (v29) with a free H_t per layer (one combiner, like LADMM-F), initialised at the analytic graph step,
+# data step whitened (A^+ y), the energy gate on the beam graph (zstep gate: the best free-H network of the v29 CPU check on SV ULA, DeepMIMO ULA
+# and 3GPP ULA; graph TV hurt with a free H), noise level from the residual.
+model: {model: Graph-LADMM, T: 6, zstep: gate, xstep: free, sigma: residual, edge_phase: data, lr_mult: 10.0,
+        precision: float32}
+train:
+  schedule: steps
+  steps: 30000
+  lr: 1.0e-3
+  lr_final_frac: 0.05
+  grad_clip: 1.0
+  batch_size: 256
+  loss: log_nse
+  val_metric: nmse
+  val_round: null
+  val_every: 500
+  restore_best: true
+  optimizer: adam_torch
+  noise: online

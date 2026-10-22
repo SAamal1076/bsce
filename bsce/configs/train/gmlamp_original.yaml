@@ -1,0 +1,16 @@
+# GM-LAMP exactly as Train_GM-LAMP.py / define_networks.py (Wei-Hu-Dai)
+model: {model: GM-LAMP, T: 8, K: 4, untied: true, precision: float64}
+train:
+  schedule: borgerding
+  lr: 1.0e-3
+  refinements: [0.5, 0.1, 0.01]
+  maxit: 1000000
+  better_wait: 5000
+  ivl: 10
+  check_mult: 100
+  batch_size: 128
+  loss: nmse
+  val_metric: nmse
+  val_round: 5
+  warm_start: true          # do_training(): new layer initialised from the previous one
+  optimizer: adam_tf1

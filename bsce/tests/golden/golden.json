@@ -1,0 +1,67 @@
+{
+ "ADMM-Net": {
+  "n_stages": 1,
+  "param_abs_sum": 14683.140856830532,
+  "val_nmse": 0.4028886762355628
+ },
+ "ALISTA": {
+  "n_stages": 9,
+  "param_abs_sum": 3.1733760720553827,
+  "val_nmse": 0.7793961443490894
+ },
+ "GM-LAMP-spread": {
+  "n_stages": 16,
+  "param_abs_sum": 1806.8919325896122,
+  "val_nmse": 0.8102682169052984
+ },
+ "LADMM-diag": {
+  "n_stages": 16,
+  "param_abs_sum": 530.1371146398018,
+  "val_nmse": 0.34757558245814363
+ },
+ "LADMM-diagprior": {
+  "n_stages": 16,
+  "param_abs_sum": 1161.7461312807047,
+  "val_nmse": 0.4119661340362299
+ },
+ "LADMM-full": {
+  "n_stages": 16,
+  "param_abs_sum": 2233.8960279488947,
+  "val_nmse": 0.2783556089037496
+ },
+ "LADMM-kron": {
+  "n_stages": 16,
+  "param_abs_sum": 72.11393132175729,
+  "val_nmse": 0.49426951083176507
+ },
+ "LADMM-kronprior": {
+  "n_stages": 16,
+  "param_abs_sum": 13.411629528021749,
+  "val_nmse": 0.3778171412179955
+ },
+ "LADMM-lowrank": {
+  "n_stages": 16,
+  "param_abs_sum": 160.46112098600048,
+  "val_nmse": 0.3468057086682788
+ },
+ "LADMM-psd": {
+  "n_stages": 16,
+  "param_abs_sum": 6279.100350193324,
+  "val_nmse": 0.29377658933147727
+ },
+ "LAMP": {
+  "n_stages": 16,
+  "param_abs_sum": 2066.42808889752,
+  "val_nmse": 0.46244465496485704
+ },
+ "LISTA": {
+  "n_stages": 9,
+  "param_abs_sum": 4083.76397788926,
+  "val_nmse": 0.5009542934036233
+ },
+ "LVAMP": {
+  "n_stages": 7,
+  "param_abs_sum": 6.406151754193131,
+  "val_nmse": 0.3774430929879041
+ }
+}

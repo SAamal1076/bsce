@@ -1,0 +1,33 @@
+# 3GPP TR 38.901 UMi street canyon, 28 GHz, UPA y-z (scripts/make_3gpp_data.py writes data/3GPP_UPA and rewrites
+# this file with the sizes it made; default 80000 / 2000 / 2000 = the sizes of SV). Lens x = U0^H h,
+# ||x||^2 = N per channel; CS matrix of SV; the authors' bands (0-10 / 10-20 dB, validation at 10 dB).
+# docs/3GPP_DATASET.md
+name: 3GPP_UPA
+dataset: 3GPP
+array: UPA
+N1: 16
+N2: 16
+L: 3
+M: 128
+cs_matrix: reference/gmlamp/CE_SV/CSmatrix256128.mat
+data_dir: data/3GPP_UPA
+seed: 2026
+n_train: 80000
+n_val: 2000
+n_test: 2000
+n_snr_chunks: 10
+bands:
+- name: 0to10dB
+  train: [0, 10]
+  val_snr: [10]
+  use_for: [0, 10]
+- name: 10to20dB
+  train: [10, 20]
+  val_snr: [10]
+  use_for: [10, 20.01]
+test_snr_db: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+channel_model: {implementation: 'bsce built-in (NumPy), 3GPP TR 38.901 v16.1', scenario: 3GPP_38.901_UMi,
+  fc: 28000000000.0, array: UPA, element: 3gpp, isd: 200.0, d_min: 10.0, h_bs: 10.0,
+  h_ut: 1.5, drop_users: 250, axes: UPA y-z, split: 'held-out drops: training from
+    drop 1, validation from drop 1,000,001, test from drop 2,000,001 (the same users
+    for any size)'}

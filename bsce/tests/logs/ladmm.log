@@ -1,0 +1,134 @@
+.F.......F...................                                            [100%]
+=================================== FAILURES ===================================
+_______________________ test_ladmm_vs_matlab[0-2.0-UPA] ________________________
+
+array = 'UPA', snr = 2.0, seed = 0
+record = <function record.<locals>._rec at 0x7f1e1c2ed300>
+
+    @needs_oct
+    @pytest.mark.skipif(not MODELS.exists(), reason="trained LADMM weights not available")
+    @pytest.mark.parametrize("array", ["ULA", "UPA"])
+    @pytest.mark.parametrize("snr", [2.0, 8.0, 12.0, 17.0])
+    @pytest.mark.parametrize("seed", [0, 1])
+    def test_ladmm_vs_matlab(array, snr, seed, record):
+        A = _A_double()
+        x = _x(array, seed)
+        y = measurements.gen_measurements_matlab(x, A, snr, NumpyMatlabRNG(500 + seed))
+        rng_idx = 1 if snr < 5 else 2 if snr < 10 else 3 if snr < 15 else 4
+        src = MODELS / (f"Trained_LADMM_for_DeepMIMO_{array}_1282560to10dB_1dB.mat" if snr < 10
+                        else f"Trained_LADMM_for_DeepMIMO_{array}_12825610to20dB_11dB.mat")
+        wd = tmpdir()
+        if array == "ULA":
+            fn, typ, T, func = f"Trained_LADMM_for_SV_ULA_256128{ULA_NAMES[rng_idx]}.mat", 1, 6, "LADMM_test"
+            shutil.copy(USER / "ULA_test_code" / "LADMM_test.m", wd)
+        else:
+            fn, typ, T, func = f"Trained_LADMM_for_SV_UPA_256128{UPA_NAMES[rng_idx]}.mat", 2, UPA_T[rng_idx], "LADMM_UPA_test"
+            shutil.copy(USER / "UPA_test_code" / "LADMM_UPA_test.m", wd)
+        shutil.copy(src, wd / fn)       # the unchanged .m loads this file name
+        sio.savemat(wd / "in.mat", {"y": y, "A": A, "x": x})
+        run_octave(f"load in.mat; [xh, nm] = {func}(y, A, {typ}, {rng_idx}, x); save('-v7','out.mat','xh','nm');", wd)
+        ref = sio.loadmat(wd / "out.mat")
+        model = LADMM(A, T=T, operator="full", precision="float64")
+        model.load_mat_dict(sio.loadmat(src))
+        with torch.no_grad():
+            outs = model.forward_stages(torch.as_tensor(y))
+>       r = compare(outs[-1].numpy(), ref["xh"], f"LADMM {array} {snr}dB", 1e-12)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_ladmm_vs_originals.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = array([[ 8.69377765e-03-0.0066616j ,  0.00000000e+00+0.j        ,
+         3.20890671e-02-0.00055424j, ...,  0.0000000...8.88336492e-02-0.19836118j,
+        -1.93440941e-01-0.31914209j, -6.10889996e-02+0.04647691j]],
+      shape=(256, 100))
+b = array([[-0.03468035-7.81373345e-02j, -0.03463094+4.94339126e-02j,
+        -0.02374856+6.98847615e-02j, ..., -0.0368527...0.04253125+3.25615369e-02j,
+        -0.28134595-4.04465862e-01j, -0.09753506-4.00190308e-02j]],
+      shape=(256, 100))
+name = 'LADMM UPA 2.0dB', tol = 1e-12
+
+    def compare(a, b, name="", tol=1e-12):
+        """Return dict(max_abs, rel) and assert rel <= tol (relative Frobenius error)."""
+        a = np.asarray(a)
+        b = np.asarray(b)
+        assert a.shape == b.shape, f"{name}: shape {a.shape} vs {b.shape}"
+        diff = np.abs(a - b)
+        max_abs = float(diff.max()) if diff.size else 0.0
+        denom = float(np.linalg.norm(b.ravel())) or 1.0
+        rel = float(np.linalg.norm((a - b).ravel()) / denom)
+>       assert rel <= tol, f"{name}: relative error {rel:.3e} > {tol:.1e} (max abs {max_abs:.3e})"
+               ^^^^^^^^^^
+E       AssertionError: LADMM UPA 2.0dB: relative error 3.354e-01 > 1.0e-12 (max abs 8.467e-01)
+
+tests/harness/octave.py:72: AssertionError
+_______________________ test_ladmm_vs_matlab[1-2.0-UPA] ________________________
+
+array = 'UPA', snr = 2.0, seed = 1
+record = <function record.<locals>._rec at 0x7f1e1c2ed300>
+
+    @needs_oct
+    @pytest.mark.skipif(not MODELS.exists(), reason="trained LADMM weights not available")
+    @pytest.mark.parametrize("array", ["ULA", "UPA"])
+    @pytest.mark.parametrize("snr", [2.0, 8.0, 12.0, 17.0])
+    @pytest.mark.parametrize("seed", [0, 1])
+    def test_ladmm_vs_matlab(array, snr, seed, record):
+        A = _A_double()
+        x = _x(array, seed)
+        y = measurements.gen_measurements_matlab(x, A, snr, NumpyMatlabRNG(500 + seed))
+        rng_idx = 1 if snr < 5 else 2 if snr < 10 else 3 if snr < 15 else 4
+        src = MODELS / (f"Trained_LADMM_for_DeepMIMO_{array}_1282560to10dB_1dB.mat" if snr < 10
+                        else f"Trained_LADMM_for_DeepMIMO_{array}_12825610to20dB_11dB.mat")
+        wd = tmpdir()
+        if array == "ULA":
+            fn, typ, T, func = f"Trained_LADMM_for_SV_ULA_256128{ULA_NAMES[rng_idx]}.mat", 1, 6, "LADMM_test"
+            shutil.copy(USER / "ULA_test_code" / "LADMM_test.m", wd)
+        else:
+            fn, typ, T, func = f"Trained_LADMM_for_SV_UPA_256128{UPA_NAMES[rng_idx]}.mat", 2, UPA_T[rng_idx], "LADMM_UPA_test"
+            shutil.copy(USER / "UPA_test_code" / "LADMM_UPA_test.m", wd)
+        shutil.copy(src, wd / fn)       # the unchanged .m loads this file name
+        sio.savemat(wd / "in.mat", {"y": y, "A": A, "x": x})
+        run_octave(f"load in.mat; [xh, nm] = {func}(y, A, {typ}, {rng_idx}, x); save('-v7','out.mat','xh','nm');", wd)
+        ref = sio.loadmat(wd / "out.mat")
+        model = LADMM(A, T=T, operator="full", precision="float64")
+        model.load_mat_dict(sio.loadmat(src))
+        with torch.no_grad():
+            outs = model.forward_stages(torch.as_tensor(y))
+>       r = compare(outs[-1].numpy(), ref["xh"], f"LADMM {array} {snr}dB", 1e-12)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_ladmm_vs_originals.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = array([[ 0.        +0.j        ,  0.        +0.j        ,
+        -0.04006757-0.00406249j, ...,  0.        +0.j       ...497j, ..., -0.05594889-0.07442198j,
+        -0.36516273+0.02533735j,  0.09894776-0.05076897j]],
+      shape=(256, 100))
+b = array([[-1.73841979e-02-0.01673984j,  9.73420192e-04-0.05357107j,
+        -2.67473795e-02+0.00302479j, ...,  7.2692732...1.94972013e-01-0.16774898j,
+        -2.32298266e-01-0.03573322j,  3.17728467e-01-0.09578237j]],
+      shape=(256, 100))
+name = 'LADMM UPA 2.0dB', tol = 1e-12
+
+    def compare(a, b, name="", tol=1e-12):
+        """Return dict(max_abs, rel) and assert rel <= tol (relative Frobenius error)."""
+        a = np.asarray(a)
+        b = np.asarray(b)
+        assert a.shape == b.shape, f"{name}: shape {a.shape} vs {b.shape}"
+        diff = np.abs(a - b)
+        max_abs = float(diff.max()) if diff.size else 0.0
+        denom = float(np.linalg.norm(b.ravel())) or 1.0
+        rel = float(np.linalg.norm((a - b).ravel()) / denom)
+>       assert rel <= tol, f"{name}: relative error {rel:.3e} > {tol:.1e} (max abs {max_abs:.3e})"
+               ^^^^^^^^^^
+E       AssertionError: LADMM UPA 2.0dB: relative error 3.559e-01 > 1.0e-12 (max abs 8.087e-01)
+
+tests/harness/octave.py:72: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_ladmm_vs_originals.py::test_ladmm_vs_matlab[0-2.0-UPA] - As...
+FAILED tests/test_ladmm_vs_originals.py::test_ladmm_vs_matlab[1-2.0-UPA] - As...
+2 failed, 27 passed in 499.79s (0:08:19)
+
+real	8m21.402s
+user	8m21.839s
+sys	0m13.326s

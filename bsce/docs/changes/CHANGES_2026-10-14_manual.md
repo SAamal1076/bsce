@@ -1,0 +1,22 @@
+# 14 Oct 2026 (4): complete package and manual
+
+- **`MANUAL.md`**: the complete guide, sections 0–17 plus option appendices. It covers:
+  - the package and installation
+  - concepts and data (GM-LAMP data, any size, split or SNR, online noise, your own data)
+  - all methods with parameter counts
+  - training schedules (layer by layer + fine-tune, end to end, epochs, ALISTA)
+  - protocols (`original`, `gmlamp`, `gmlamp_best`, `ladmm_best`, `fair`, `e2e`)
+  - one network vs per-band (fine-tune), number of layers, running, evaluation, figures and tables
+  - MATLAB, nine recipes, tests, tracking, troubleshooting and reference numbers
+- **`configs/train/e2e_protocol.yaml`, `--protocol e2e`**: all layers trained together end to end for **any** method. Smoke-tested with LADMM, LAMP, GM-LAMP, LISTA and LVAMP.
+- **`scripts/make_figures.py`**: the paper figure, one panel per scenario with values printed (png + pdf).
+  - Tables at chosen SNRs (csv / md / tex), with ± std over seeds and the gain over a reference method.
+  - Method selection and renaming.
+- **`scripts/check_env.py`**: checks packages, GPU, reference files and data sets.
+- **`scripts/make_cli_reference.py`** writes `docs/CLI_REFERENCE.md` (the `--help` of every script).
+- **`models/`**: your best LADMM checkpoint (`untitled2.py`, SV UPA 0–20 dB).
+- **Packaging**: five zips.
+  - `bsce_code.zip`
+  - `bsce_reference_part1..3.zip` (GM-LAMP data/weights, needed)
+  - `bsce_reference_part4.zip` (original code, tests only)
+- README and `reference/README.md` updated to these names.

@@ -1,0 +1,4 @@
+# LADMM (full 256 x 256 operator per layer, T = 6, scalar soft threshold) + the protocol of untitled2.py.
+# See ladmm_best_protocol.yaml for where every value comes from.
+_base: ladmm_best_protocol.yaml
+model: {model: LADMM, T: 6, operator: full, untied: true, threshold: scalar}

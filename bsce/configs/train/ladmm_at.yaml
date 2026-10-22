@@ -1,0 +1,16 @@
+# v31.3: LADMM (full operator, as ladmm_original) with adaptive threshold, blind noise level (median)
+model: {model: LADMM, T: 6, operator: full, untied: true, threshold: adaptive, precision: float32, init_precision: float32}
+train:
+  schedule: borgerding
+  lr: 1.0e-3
+  refinements: [0.5, 0.1, 0.01]
+  maxit: 35000
+  better_wait: 2000
+  ivl: 10
+  check_mult: 100
+  batch_size: 1024
+  loss: nmse
+  val_metric: nmse
+  val_round: 5
+  warm_start: false
+  optimizer: adam_tf1

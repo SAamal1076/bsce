@@ -1,0 +1,25 @@
+# Graph-LADMM (v31), combiner-agnostic training over a MIXTURE of combiners: every minibatch a new combiner with
+# M in {64, 96, 128, 160} and a family in {random +-1, Gaussian, partially connected, DCT rows} (train.combiner=mix), so
+# the network also sees other sizes and structured combiners (where the networks trained on one size lost most,
+# check_combiners.py). Validation and the saved network use the scenario's combiner. Note: check_combiners.py's
+# structured test combiners are then of families seen in training (other draws).
+model: {model: Graph-LADMM, T: 8, zstep: gtv_gate, xstep: analytic, sigma: residual, edge_phase: data, lr_mult: 10.0,
+        precision: float32}
+train:
+  schedule: steps
+  steps: 30000
+  lr: 1.0e-3
+  lr_final_frac: 0.05
+  grad_clip: 1.0
+  batch_size: 256
+  loss: log_nse
+  val_metric: nmse
+  val_round: null
+  val_every: 500
+  restore_best: true
+  optimizer: adam_torch
+  noise: online
+  combiner: mix
+  combiner_every: 1
+  combiner_M: [64, 96, 128, 160]
+  combiner_types: [pm1, gauss, sparse, dct]

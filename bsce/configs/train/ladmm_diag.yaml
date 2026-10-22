@@ -1,0 +1,16 @@
+# LADMM variant 'diag' (A/B/C scripts, float64)
+model: {model: LADMM, T: 6, operator: diag, untied: true, precision: float64}
+train:
+  schedule: borgerding
+  lr: 5.0e-4
+  refinements: [0.5, 0.1, 0.01]
+  maxit: 100000
+  better_wait: 2000
+  ivl: 10
+  check_mult: 100
+  batch_size: 256
+  loss: nmse
+  val_metric: nmse
+  val_round: 5
+  warm_start: false
+  optimizer: adam_tf1

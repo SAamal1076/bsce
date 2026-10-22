@@ -1,0 +1,33 @@
+........F
+=================================== FAILURES ===================================
+______________________ test_lamp_training_graph[0-soft-4] ______________________
+
+shrink = 'soft', T = 4, seed = 0
+record = <function record.<locals>._rec at 0x7f6af170c9a0>
+
+    @pytest.mark.parametrize("shrink,T", [("soft", 4), ("gm", 3)])
+    @pytest.mark.parametrize("seed", [0, 1, 2])
+    def test_lamp_training_graph(shrink, T, seed, record):
+        """Original setup_training(): stage list, gradients and Adam updates of EVERY stage."""
+        A, x, y = _problem(seed)
+        K, lr, refs, nsteps = 4, 1e-3, (0.5, 0.1, 0.01), 5
+        model = LAMP(A, T=T, shrink=shrink, untied=True, K=K, precision="float64")
+        weights = _perturbed(model, seed)
+        cfg = TrainConfig(lr=lr, refinements=refs, loss="nmse")
+        stages = build_stages(model, cfg)
+        test_stages = list(range(len(stages)))
+        ref = _run_ref(mode="train", A=A, y=y, x=x, shrink=shrink, K=K, T=T, lr=lr, refinements=np.array(refs),
+                       nsteps=nsteps, test_stages=np.array(test_stages), **weights)
+        assert [s["name"] for s in stages] == list(ref["stage_names"]), "stage list differs from original"
+>       assert [",".join(s["params"]) for s in stages] == list(ref["stage_vars"]), "stage variable lists differ"
+E       AssertionError: stage variable lists differ
+E       assert ['B_0', 'B_0'...theta_0', ...] == [np.str_('B_0...heta_0'), ...]
+E         
+E         At index 1 diff: 'B_0' != np.str_('B_0,theta_0')
+E         Use -v to get more diff
+
+tests/test_lamp_vs_tf.py:85: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_lamp_vs_tf.py::test_lamp_training_graph[0-soft-4] - Asserti...
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 8 passed in 600.41s (0:10:00)

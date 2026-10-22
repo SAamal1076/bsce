@@ -1,0 +1,23 @@
+# Overrides applied on top of any train config with --protocol fair: every learned method
+# uses the same optimiser, batch, iteration budget and early stopping (data and SNR bands
+# come from the scenario file, so they are shared by construction).
+model:
+  precision: float32           # every method in float32 (as ladmm_best; GM-LAMP is float32-safe)
+train:
+  refine_name: index
+  restore_best: false
+  warm_start: false
+  noise: file                  # every method: training noise from the measurement files (same noise for all)
+  schedule: borgerding
+  grad_clip: null             # no clipping for every method (NF-LADMM configs set 1.0 for their own end-to-end training)
+  lr: 1.0e-3
+  refinements: [0.5, 0.1, 0.01]
+  maxit: 50000
+  better_wait: 3000
+  ivl: 10
+  check_mult: 100
+  batch_size: 512
+  loss: nmse
+  val_metric: nmse
+  val_round: null
+  optimizer: adam_tf1

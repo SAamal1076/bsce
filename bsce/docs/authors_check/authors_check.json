@@ -1,0 +1,386 @@
+{
+ "measurements": {
+  "SV_ULA": {
+   "sizes": {
+    "training": 80000,
+    "validation": 2000,
+    "test": 2000
+   },
+   "files": {
+    "training 0to10dB": {
+     "chunks": 10,
+     "snr_db": [
+      9.1,
+      0.63,
+      9.28,
+      0.21,
+      6.38,
+      7.33,
+      1.5,
+      1.19,
+      5.85,
+      5.14
+     ],
+     "max_error_db": 0.009,
+     "ok": true
+    },
+    "training 10to20dB": {
+     "chunks": 10,
+     "snr_db": [
+      13.56,
+      11.87,
+      17.8,
+      11.31,
+      18.93,
+      11.83,
+      13.38,
+      16.94,
+      13.46,
+      12.08
+     ],
+     "max_error_db": 0.007,
+     "ok": true
+    },
+    "validation 0to10dB": {
+     "chunks": 1,
+     "snr_db": [
+      10.0
+     ],
+     "max_error_db": 0.006,
+     "ok": true
+    },
+    "validation 10to20dB": {
+     "chunks": 1,
+     "snr_db": [
+      10.0
+     ],
+     "max_error_db": 0.01,
+     "ok": true
+    }
+   }
+  },
+  "SV_UPA": {
+   "sizes": {
+    "training": 80000,
+    "validation": 2000,
+    "test": 2000
+   },
+   "files": {
+    "training 0to10dB": {
+     "chunks": 10,
+     "snr_db": [
+      9.1,
+      0.63,
+      9.28,
+      0.21,
+      6.38,
+      7.33,
+      1.5,
+      1.19,
+      5.85,
+      5.14
+     ],
+     "max_error_db": 0.009,
+     "ok": true
+    },
+    "training 10to20dB": {
+     "chunks": 10,
+     "snr_db": [
+      13.56,
+      11.87,
+      17.8,
+      11.31,
+      18.93,
+      11.83,
+      13.38,
+      16.94,
+      13.46,
+      12.08
+     ],
+     "max_error_db": 0.007,
+     "ok": true
+    },
+    "validation 0to10dB": {
+     "chunks": 1,
+     "snr_db": [
+      10.0
+     ],
+     "max_error_db": 0.006,
+     "ok": true
+    },
+    "validation 10to20dB": {
+     "chunks": 1,
+     "snr_db": [
+      10.0
+     ],
+     "max_error_db": 0.01,
+     "ok": true
+    }
+   }
+  },
+  "DeepMIMO_ULA": {
+   "sizes": {
+    "training": 50000,
+    "validation": 2000,
+    "test": 2000
+   },
+   "files": {
+    "training 0to10dB": {
+     "chunks": 10,
+     "snr_db": [
+      9.1,
+      0.63,
+      9.28,
+      0.21,
+      6.38,
+      7.33,
+      1.5,
+      1.19,
+      5.85,
+      5.14
+     ],
+     "max_error_db": 0.013,
+     "ok": true
+    },
+    "training 10to20dB": {
+     "chunks": 10,
+     "snr_db": [
+      13.56,
+      11.87,
+      17.8,
+      11.31,
+      18.93,
+      11.83,
+      13.38,
+      16.94,
+      13.46,
+      12.08
+     ],
+     "max_error_db": 0.016,
+     "ok": true
+    },
+    "validation 0to10dB": {
+     "chunks": 1,
+     "snr_db": [
+      10.0
+     ],
+     "max_error_db": 0.016,
+     "ok": true
+    },
+    "validation 10to20dB": {
+     "chunks": 1,
+     "snr_db": [
+      10.0
+     ],
+     "max_error_db": 0.003,
+     "ok": true
+    }
+   }
+  },
+  "DeepMIMO_UPA": {
+   "sizes": {
+    "training": 50000,
+    "validation": 2000,
+    "test": 2000
+   },
+   "files": {
+    "training 0to10dB": {
+     "chunks": 10,
+     "snr_db": [
+      9.1,
+      0.63,
+      9.28,
+      0.21,
+      6.38,
+      7.33,
+      1.5,
+      1.19,
+      5.85,
+      5.14
+     ],
+     "max_error_db": 0.013,
+     "ok": true
+    },
+    "training 10to20dB": {
+     "chunks": 10,
+     "snr_db": [
+      13.56,
+      11.87,
+      17.8,
+      11.31,
+      18.93,
+      11.83,
+      13.38,
+      16.94,
+      13.46,
+      12.08
+     ],
+     "max_error_db": 0.016,
+     "ok": true
+    },
+    "validation 0to10dB": {
+     "chunks": 1,
+     "snr_db": [
+      10.0
+     ],
+     "max_error_db": 0.016,
+     "ok": true
+    },
+    "validation 10to20dB": {
+     "chunks": 1,
+     "snr_db": [
+      10.0
+     ],
+     "max_error_db": 0.003,
+     "ok": true
+    }
+   }
+  }
+ },
+ "validation": [
+  {
+   "network": "LAMP SV_ULA 0to10dB",
+   "data": "SV",
+   "authors_db": -14.654662,
+   "ours_db": -14.635,
+   "diff_db": 0.02,
+   "sd_db": 0.05,
+   "z": 0.28
+  },
+  {
+   "network": "LAMP SV_ULA 10to20dB",
+   "data": "SV",
+   "authors_db": -16.29672,
+   "ours_db": -16.333,
+   "diff_db": -0.036,
+   "sd_db": 0.059,
+   "z": -0.43
+  },
+  {
+   "network": "GM-LAMP SV_ULA 0to10dB",
+   "data": "SV",
+   "authors_db": -16.259853,
+   "ours_db": -16.029,
+   "diff_db": 0.231,
+   "sd_db": 0.116,
+   "z": 1.4
+  },
+  {
+   "network": "GM-LAMP SV_ULA 10to20dB",
+   "data": "SV",
+   "authors_db": -16.798537,
+   "ours_db": -16.76,
+   "diff_db": 0.038,
+   "sd_db": 0.065,
+   "z": 0.42
+  },
+  {
+   "network": "LAMP SV_UPA 0to10dB",
+   "data": "SV",
+   "authors_db": -13.023348,
+   "ours_db": -13.114,
+   "diff_db": -0.091,
+   "sd_db": 0.049,
+   "z": -1.3
+  },
+  {
+   "network": "LAMP SV_UPA 10to20dB",
+   "data": "SV",
+   "authors_db": -14.710833,
+   "ours_db": -14.767,
+   "diff_db": -0.056,
+   "sd_db": 0.056,
+   "z": -0.71
+  },
+  {
+   "network": "GM-LAMP SV_UPA 0to10dB",
+   "data": "SV",
+   "authors_db": -14.355707,
+   "ours_db": -14.35,
+   "diff_db": 0.006,
+   "sd_db": 0.052,
+   "z": 0.08
+  },
+  {
+   "network": "GM-LAMP SV_UPA 10to20dB",
+   "data": "SV",
+   "authors_db": -15.05428,
+   "ours_db": -15.209,
+   "diff_db": -0.155,
+   "sd_db": 0.056,
+   "z": -1.94
+  },
+  {
+   "network": "LAMP DeepMIMO_ULA 0to10dB",
+   "data": "DeepMIMO",
+   "authors_db": -20.443122,
+   "ours_db": -20.562,
+   "diff_db": -0.119,
+   "sd_db": 0.051,
+   "z": -1.64
+  },
+  {
+   "network": "LAMP DeepMIMO_ULA 10to20dB",
+   "data": "DeepMIMO",
+   "authors_db": -20.788339,
+   "ours_db": -20.957,
+   "diff_db": -0.168,
+   "sd_db": 0.037,
+   "z": -3.18
+  },
+  {
+   "network": "GM-LAMP DeepMIMO_ULA 0to10dB",
+   "data": "DeepMIMO",
+   "authors_db": -21.343039,
+   "ours_db": -21.585,
+   "diff_db": -0.242,
+   "sd_db": 0.078,
+   "z": -2.18
+  },
+  {
+   "network": "GM-LAMP DeepMIMO_ULA 10to20dB",
+   "data": "DeepMIMO",
+   "authors_db": -21.4752,
+   "ours_db": -21.649,
+   "diff_db": -0.174,
+   "sd_db": 0.04,
+   "z": -3.08
+  },
+  {
+   "network": "LAMP DeepMIMO_UPA 0to10dB",
+   "data": "DeepMIMO",
+   "authors_db": -19.222688,
+   "ours_db": -19.241,
+   "diff_db": -0.018,
+   "sd_db": 0.044,
+   "z": -0.29
+  },
+  {
+   "network": "LAMP DeepMIMO_UPA 10to20dB",
+   "data": "DeepMIMO",
+   "authors_db": -19.496202,
+   "ours_db": -19.561,
+   "diff_db": -0.065,
+   "sd_db": 0.038,
+   "z": -1.21
+  },
+  {
+   "network": "GM-LAMP DeepMIMO_UPA 0to10dB",
+   "data": "DeepMIMO",
+   "authors_db": -20.861861,
+   "ours_db": -20.891,
+   "diff_db": -0.029,
+   "sd_db": 0.05,
+   "z": -0.41
+  },
+  {
+   "network": "GM-LAMP DeepMIMO_UPA 10to20dB",
+   "data": "DeepMIMO",
+   "authors_db": -21.307683,
+   "ours_db": -21.358,
+   "diff_db": -0.05,
+   "sd_db": 0.045,
+   "z": -0.8
+  }
+ ]
+}

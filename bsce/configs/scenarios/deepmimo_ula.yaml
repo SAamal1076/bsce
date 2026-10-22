@@ -1,0 +1,22 @@
+# DeepMIMO O1 at 28 GHz, GM-LAMP setting: BS 3, user rows R1000-R1300, 3 paths, narrowband,
+# lens ULA 256, half-wavelength spacing; 50000 / 2000 / 2000 channels, each ||x||^2 = N.
+# 1) MATLAB: deepmimo_make_H('<DeepMIMO-matlab-1.3 dir>', 'H_ula.mat', 'ULA')  (matlab/deepmimo_make_H.m)
+# 2) python scripts/deepmimo_convert.py --scenario configs/scenarios/deepmimo_ula.yaml --input <file>.mat
+#    (x = U0^H h as GM-LAMP, ||x||^2 = N, GM-LAMP's test file as test set, 50000/2000 train/val from the other users)
+# 3) python scripts/generate_data.py --scenario configs/scenarios/deepmimo_ula.yaml --measurements-only
+# CS matrix: GM-LAMP's DeepMIMO matrix (stored in single precision; converted to double on load).
+name: DeepMIMO_ULA
+dataset: DeepMIMO
+array: ULA
+N1: 16
+N2: 16
+L: 3
+M: 128
+cs_matrix: reference/gmlamp/CE_DeepMIMO/CSmatrix_128256.mat
+data_dir: data/DeepMIMO_ULA
+seed: 2026
+n_snr_chunks: 10
+bands:
+  - {name: 0to10dB,  train: [0, 10],  val_snr: [10], use_for: [0, 10]}
+  - {name: 10to20dB, train: [10, 20], val_snr: [10], use_for: [10, 20.01]}
+test_snr_db: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]

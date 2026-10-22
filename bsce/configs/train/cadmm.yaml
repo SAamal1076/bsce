@@ -1,0 +1,17 @@
+# Complex ADMM-Net with untied M1, M2 and over-relaxation (Johnston et al., IEEE TSP 2021), v28 baseline of the
+# LADMM family. The training section is LADMM's (LADMM_train.py), so --protocol paper trains it like LADMM-F.
+model: {model: CADMM, T: 6, rho0: 1.0, precision: float32}
+train:
+  schedule: borgerding
+  lr: 1.0e-3
+  refinements: [0.5, 0.1, 0.01]
+  maxit: 35000
+  better_wait: 2000
+  ivl: 10
+  check_mult: 100
+  batch_size: 1024
+  loss: nmse
+  val_metric: nmse
+  val_round: 5
+  warm_start: false
+  optimizer: adam_tf1

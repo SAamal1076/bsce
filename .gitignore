@@ -1,0 +1,35 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+
+# Logs
+*.log
+
+# bsce: keep the test logs shipped with the package
+!bsce/**/*.log
+
+# bsce: made by the scripts
+bsce/data/
+bsce/outputs/
+bsce/results/
+bsce/reference/*
+!bsce/reference/user/

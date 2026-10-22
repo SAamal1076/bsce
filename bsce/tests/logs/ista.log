@@ -1,0 +1,224 @@
+.F...F.............s                                                     [100%]
+=================================== FAILURES ===================================
+__________________ test_lista_alista_vs_tf[0-float64-ALISTA] ___________________
+
+net = 'ALISTA', prec = 'float64', seed = 0
+record = <function record.<locals>._rec at 0x7f5ed010fba0>
+
+    @pytest.mark.parametrize("net", ["LISTA", "ALISTA"])
+    @pytest.mark.parametrize("prec", ["float64", "float32"])
+    @pytest.mark.parametrize("seed", [0, 1])
+    def test_lista_alista_vs_tf(net, prec, seed, record):
+        A, x, y = _problem(seed)
+        T, lam = 5, 0.4
+        W = alista_W(A)
+        kw = dict(percent=4.0, max_percent=12.0)
+        if net == "LISTA":
+            model = LISTA(A, T=T, lam=lam, untied=True, complex_mode=False, precision=prec)
+        else:
+            model = ALISTA(A, T=T, lam=lam, W=W, complex_mode=False, precision=prec, **kw)
+        if prec == "float32":   # the original casts A (and W) to float32 before everything
+            model.A.copy_(torch.as_tensor(A.astype(np.float32)))
+        w = _perturb(model, seed)
+        cfg = TrainConfig(schedule="alista", lr=LR, lr_decay=(0.25, 0.0625), decay_rate=0.5)
+        stages = build_stages(model, cfg)
+        refdir = REFERENCE / ("alista_f64" if prec == "float64" else "alista")
+>       ref = _run(net=net, refdir=str(refdir), A=A, y=y, x=x, T=T, lam=lam, untied=True, W=W, init_lr=LR,
+                   decay_rate=0.5, lr_decay=np.array([0.25, 0.0625]), refinements=np.array([0.5]), nsteps=4,
+                   **{f"w_{k}": v for k, v in w.items()}, **kw)
+
+tests/test_ista_lvamp_vs_tf.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_ista_lvamp_vs_tf.py:44: in _run
+    subprocess.run([sys.executable, str(RUNNER), str(wd / "in.npz"), str(wd / "out.npz")], check=True,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/usr/bin/python3', '/home/claude/bsce/tests/harness/ref_tf_ista.py', '/tmp/bsce_tf_qvdv27b4/in.npz', '/tmp/bsce_tf_qvdv27b4/out.npz'],)
+kwargs = {'stdout': -1, 'stderr': -1}
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout (seconds) is given and the process takes too long,
+         a TimeoutExpired exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/usr/bin/python3', '/home/claude/bsce/tests/harness/ref_tf_ista.py', '/tmp/bsce_tf_qvdv27b4/in.npz', '/tmp/bsce_tf_qvdv27b4/out.npz']' returned non-zero exit status 1.
+
+/usr/lib/python3.13/subprocess.py:578: CalledProcessError
+__________________ test_lista_alista_vs_tf[1-float64-ALISTA] ___________________
+
+net = 'ALISTA', prec = 'float64', seed = 1
+record = <function record.<locals>._rec at 0x7f5ed010fba0>
+
+    @pytest.mark.parametrize("net", ["LISTA", "ALISTA"])
+    @pytest.mark.parametrize("prec", ["float64", "float32"])
+    @pytest.mark.parametrize("seed", [0, 1])
+    def test_lista_alista_vs_tf(net, prec, seed, record):
+        A, x, y = _problem(seed)
+        T, lam = 5, 0.4
+        W = alista_W(A)
+        kw = dict(percent=4.0, max_percent=12.0)
+        if net == "LISTA":
+            model = LISTA(A, T=T, lam=lam, untied=True, complex_mode=False, precision=prec)
+        else:
+            model = ALISTA(A, T=T, lam=lam, W=W, complex_mode=False, precision=prec, **kw)
+        if prec == "float32":   # the original casts A (and W) to float32 before everything
+            model.A.copy_(torch.as_tensor(A.astype(np.float32)))
+        w = _perturb(model, seed)
+        cfg = TrainConfig(schedule="alista", lr=LR, lr_decay=(0.25, 0.0625), decay_rate=0.5)
+        stages = build_stages(model, cfg)
+        refdir = REFERENCE / ("alista_f64" if prec == "float64" else "alista")
+>       ref = _run(net=net, refdir=str(refdir), A=A, y=y, x=x, T=T, lam=lam, untied=True, W=W, init_lr=LR,
+                   decay_rate=0.5, lr_decay=np.array([0.25, 0.0625]), refinements=np.array([0.5]), nsteps=4,
+                   **{f"w_{k}": v for k, v in w.items()}, **kw)
+
+tests/test_ista_lvamp_vs_tf.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_ista_lvamp_vs_tf.py:44: in _run
+    subprocess.run([sys.executable, str(RUNNER), str(wd / "in.npz"), str(wd / "out.npz")], check=True,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/usr/bin/python3', '/home/claude/bsce/tests/harness/ref_tf_ista.py', '/tmp/bsce_tf_n99sfvhf/in.npz', '/tmp/bsce_tf_n99sfvhf/out.npz'],)
+kwargs = {'stdout': -1, 'stderr': -1}
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout (seconds) is given and the process takes too long,
+         a TimeoutExpired exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/usr/bin/python3', '/home/claude/bsce/tests/harness/ref_tf_ista.py', '/tmp/bsce_tf_n99sfvhf/in.npz', '/tmp/bsce_tf_n99sfvhf/out.npz']' returned non-zero exit status 1.
+
+/usr/lib/python3.13/subprocess.py:578: CalledProcessError
+=========================== short test summary info ============================
+FAILED tests/test_ista_lvamp_vs_tf.py::test_lista_alista_vs_tf[0-float64-ALISTA]
+FAILED tests/test_ista_lvamp_vs_tf.py::test_lista_alista_vs_tf[1-float64-ALISTA]
+2 failed, 17 passed, 1 skipped in 492.55s (0:08:12)
+
+real	8m13.940s
+user	8m9.580s
+sys	0m13.404s
