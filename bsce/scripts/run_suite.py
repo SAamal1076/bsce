@@ -52,6 +52,14 @@ SNR        --train-snr 0 20       band edges of the networks trained from scratc
                                   fine-tune minibatches spread evenly too; validation over a range at equally spaced
                                   SNRs. Suffix _fair (trained and fine-tuned folders); files <band>_fair.mat
            --snr-step 0.2         with --snr-dist fair: the SNRs on the grid lo, lo+0.2, ..., hi, equal counts (_fair0p2)
+WARM START --warm-start protocol   (default) as the protocol says (ladmm_best / fair / e2e: cold; gmlamp, gmlamp_best:
+                                  warm; paper: each method's own config, LAMP / GM-LAMP warm)
+           --warm-start cold|warm  the same for every method (folder suffix _cold / _warm)
+           --warm-start best      (v31.3) every layer-wise method trained twice, cold and warm (_cold / _warm), and the
+                                  one with the better VALIDATION NMSE kept: outputs/<SCENARIO>/best_warm_start.json;
+                                  compare.py --best leaves the other one out. Each method is then compared in its best
+                                  configuration, chosen by one rule for all and never on the test set. Methods that train
+                                  all layers together (end to end) have no new layer to initialise: trained once.
 DEPTH      --save-layers          save the network after every layer (scripts/depth_snapshots.py plots the depth curve);
                                   v31.2: methods that train end to end in a mixed list train at full depth only
 SCHEDULE   --schedule layerwise   (default) every method as its protocol says: layer by layer for ladmm_best / gmlamp /
@@ -243,6 +251,50 @@ def make_suite_ensemble(a, py, base, sc, ens, train_edges, ft_edges, tbands_of, 
     plan.append((base.name, etag))
 
 
+def end_to_end_schedule(a, m, overrides):
+    """The schedule of method m if it trains all its layers together ('steps', 'end2end'), else None."""
+    from bsce.config import apply_overrides, merge
+    _, cfgp, _ = parse_method(m)
+    c = load_yaml(cfgp)
+    if protocol_of(a, m) != "paper":
+        c = merge(c, load_yaml(f"configs/train/{protocol_of(a, m)}_protocol.yaml"))
+    sch = apply_overrides(c, overrides)["train"].get("schedule", "borgerding")
+    return sch if sch in ("steps", "end2end") else None
+
+
+def mean_val_db(run_dir):
+    """Mean over the bands of the validation NMSE (dB) of the network saved in run_dir (train_log.json), or None."""
+    try:
+        bands = json.loads((run_dir / "train_log.json").read_text(encoding="utf-8"))["bands"]
+        v = [b["final_val_nmse_db"] for b in bands.values() if b.get("final_val_nmse_db") is not None]
+        return sum(v) / len(v) if v else None
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def choose_best_warm_start(base, best_runs, dry_run=False):
+    """--warm-start best: per method, keep the variant (cold / warm) with the better validation NMSE; the choice, the
+    values and the folders to leave out (the other variant and its fine-tunes) go to <base>/best_warm_start.json."""
+    f = base / "best_warm_start.json"
+    try:
+        out = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
+    except ValueError:
+        out = {}
+    print("\n[suite] --warm-start best: the variant with the better validation NMSE (dB, mean over the bands)")
+    for m, tags in best_runs.items():
+        vals = {t: mean_val_db(base / t) for t in tags}
+        if dry_run or any(v is None for v in vals.values()):
+            print(f"  {m}: not all variants trained yet ({', '.join(t for t, v in vals.items() if v is None)})")
+            continue
+        chosen = min(tags, key=lambda t: vals[t])
+        others = [t for t in tags if t != chosen]
+        out[m] = dict(chosen=chosen, validation_db=vals, exclude=[p for t in others for p in (t, f"{t}_ft_*")])
+        print(f"  {m}: " + "  ".join(f"{t} {vals[t]:.3f}" for t in tags) + f"  -> {chosen}")
+    if out and not dry_run:
+        f.write_text(json.dumps(out, indent=1), encoding="utf-8")
+        print(f"  written {f}; compare.py --best leaves the other variants out")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scenarios", nargs="+", required=True)
@@ -258,6 +310,9 @@ def main():
                     help="fine-tune early stop: steps without a gain of 0.01 dB before the learning rate (then the band) "
                          "ends; default 4000 (finetune_bands.py); 0 = always the whole --ft-iters (folder suffix _pat0)")
     ap.add_argument("--save-layers", action="store_true")
+    ap.add_argument("--warm-start", choices=["protocol", "cold", "warm", "best"], default="protocol",
+                    help="v31.3: initialise each new layer from the trained previous one? protocol (default): as the "
+                         "protocol says; cold / warm: for every method; best: both, the better one on validation kept")
     ap.add_argument("--schedule", choices=["layerwise", "e2e"], default="layerwise",
                     help="layerwise (default): as the protocol says; e2e: every method end to end")
     ap.add_argument("--e2e-steps", type=int, default=30000, help="minibatches of --schedule e2e (default 30000)")
@@ -319,6 +374,9 @@ def main():
             named += ["train.schedule=steps", f"train.steps={a.e2e_steps}", "train.lr_final_frac=0.05",
                       "train.val_every=500", "train.restore_best=true"]
             extra.append(f"e2e{a.e2e_steps // 1000}k" if a.e2e_steps % 1000 == 0 else f"e2e{a.e2e_steps}")
+    if a.warm_start in ("cold", "warm"):
+        named.append(f"train.warm_start={'true' if a.warm_start == 'warm' else 'false'}")
+        extra.append(a.warm_start)
     clip = None
     if a.grad_clip is not None:
         if a.grad_clip.lower() in ("none", "null", "0", "off"):
@@ -366,17 +424,12 @@ def main():
             ft_extra.append(f"pat{a.ft_patience}")
     no_layers = set()                                     # v31.2: methods that train all layers together
     if a.save_layers:                                     # snapshots need a layer-wise schedule: checked before hours of work
-        from bsce.config import apply_overrides, merge
         e2e_like = []
         for m in meths:
-            label, cfgp, _ = parse_method(m)
-            c = load_yaml(cfgp)
-            if protocol_of(a, m) != "paper":
-                c = merge(c, load_yaml(f"configs/train/{protocol_of(a, m)}_protocol.yaml"))
-            c = apply_overrides(c, named + list(a.set))
-            if c["train"].get("schedule", "borgerding") in ("steps", "end2end"):
+            sch = end_to_end_schedule(a, m, named + list(a.set))
+            if sch:
                 no_layers.add(m)
-                e2e_like.append(f"{m} ({c['train']['schedule']}, protocol {protocol_of(a, m)})")
+                e2e_like.append(f"{m} ({sch}, protocol {protocol_of(a, m)})")
         if e2e_like and len(no_layers) == len(meths):     # nothing at all would be saved per layer: a mistake
             sys.exit("--save-layers saves the network when each layer is finished, but these methods train all their "
                      "layers together, so nothing would be saved per layer:\n  " + ", ".join(e2e_like) +
@@ -405,6 +458,7 @@ def main():
                                            default_chunks=int(sc.get("n_snr_chunks", 10)),
                                            snr_dist=a.snr_dist if fair_sfx else None, snr_step=a.snr_step)
         print(f"\n######## {sc['name']} ({s}) -> {base}")
+        best_runs = {}                                     # --warm-start best: method -> [cold tag, warm tag]
         for m in meths:
             label, cfg, T = parse_method(m)
             if a.smoke:
@@ -413,71 +467,82 @@ def main():
             if proto != a.protocol:
                 print(f"\n[suite] {m}: its own end-to-end training (protocol {proto}), not {a.protocol} "
                       "(v30: measured better; --force-protocol to change)")
-            tag = run_tag(label, T, proto, train_edges, a.seed, a.set, extra)
-            clash = folder_clash(base / tag, cur_bands, sc.get("data_dir"))
-            if clash:
-                sys.exit(f"{base / tag} holds a run of another scenario setting: {clash}.\n  Its networks would be mixed "
-                         "with (or wrongly taken for) this one. Give the scenario file its own 'name:' (its outputs then go "
-                         "to their own folder), or use --out <another folder>.")
-            done = all((base / tag / f"{tag}_{b}.pt").exists() for b in tbands)
-            if done:
-                print(f"\n--- {tag}: trained, skipped ({', '.join(tbands)})")
-                if a.save_layers and m not in no_layers and not (base / tag / "layers").is_dir():
-                    print(f"    WARNING: --save-layers was given, but {tag} was trained without it (no layers/ folder).\n"
-                          f"    Its per-layer networks cannot be made afterwards; delete {base / tag} to retrain with snapshots.")
-            else:
-                cmd = [py, "scripts/train.py", "--scenario", s, "--train", cfg, "--tag", tag, "--device", a.device,
-                       "--out", a.out, "--seed", str(a.seed), "--set", f"model.T={T}", *named, *a.set]
-                cmd[6:6] = data_opts + nm_opts
-                if proto != "paper":
-                    cmd[6:6] = ["--protocol", proto]
-                if train_edges:
-                    cmd[6:6] = ["--snr", *[f"{e:g}" for e in train_edges]]
-                if a.save_layers and m not in no_layers:
-                    cmd.insert(6, "--save-layers")
-                if a.smoke:
-                    cmd.insert(6, "--smoke")
-                run(cmd, a.dry_run)
-            plan.append((scenario_run_name(sc, a.smoke), tag))
-            if not ft_edges:
-                continue
-            if len(tbands) != 1:
-                print(f"--- {tag}: {len(tbands)} trained bands -> no fine-tune (fine-tune starts from ONE network; "
-                      "use --ft-snr none, or train one range)")
-                continue
-            want = 30 if a.smoke else a.ft_iters
-            # <tag>_ft_<edges>dB_<iterations>[_margin..]: the budget is in the name, so budgets never mix
-            ftag = naming.ft_tag(tag, ft_edges, want, a.ft_margin, ft_extra)
-            done = lambda t: all((base / t / f"{t}_{b}.pt").exists() for b in band_names(ft_edges))  # noqa: E731
-            legacy = None
-            for old in naming.legacy_ft_tags(tag, ft_edges, a.ft_margin):     # v23 and older: <tag>-ft[edges]
-                if not done(ftag) and done(old):
-                    try:
-                        got = int(json.loads((base / old / "finetune_log.json").read_text(encoding="utf-8"))["args"]["iters"])
-                    except (OSError, ValueError, KeyError, TypeError):
-                        got = None
-                    if got == want:
-                        legacy = old
-            if legacy:
-                print(f"--- {legacy}: fine-tuned ({want} iterations), skipped. Its name is the old one; new name "
-                      f"{ftag} (scripts/rename_runs.py renames it)")
-                plan.append((scenario_run_name(sc, a.smoke), legacy))
-                continue
-            if done(ftag):
-                print(f"--- {ftag}: fine-tuned, skipped")
-            else:
-                # no --scenario: the fine-tune uses the data of the network's own training (its train_log.json),
-                # and writes next to it (outputs/<scenario>/<ftag>)
-                cmd = [py, "scripts/finetune_bands.py", "--snr", *[f"{e:g}" for e in ft_edges],
-                       "--from", base / tag / f"{tag}_{tbands[0]}.pt", "--tag", ftag,
-                       "--iters", str(30 if a.smoke else a.ft_iters), "--device", a.device, "--seed", str(a.seed)]
-                if a.smoke:
-                    cmd += ["--val-every", "10"]
-                if clip is not None:
-                    cmd += ["--grad-clip", f"{clip:g}"]
-                cmd += ft_opts
-                run(cmd, a.dry_run)
-            plan.append((scenario_run_name(sc, a.smoke), ftag))
+            if a.warm_start == "best" and not end_to_end_schedule(a, m, named + list(a.set)):
+                variants = [(["cold"], ["train.warm_start=false"]), (["warm"], ["train.warm_start=true"])]
+            else:                                 # one run (end-to-end methods: no new layer to initialise)
+                variants = [([], [])]
+            vtags = []
+            for vx, vset in variants:
+                tag = run_tag(label, T, proto, train_edges, a.seed, a.set, extra + vx)
+                vtags.append(tag)
+                clash = folder_clash(base / tag, cur_bands, sc.get("data_dir"))
+                if clash:
+                    sys.exit(f"{base / tag} holds a run of another scenario setting: {clash}.\n  Its networks would be mixed "
+                             "with (or wrongly taken for) this one. Give the scenario file its own 'name:' (its outputs then go "
+                             "to their own folder), or use --out <another folder>.")
+                done = all((base / tag / f"{tag}_{b}.pt").exists() for b in tbands)
+                if done:
+                    print(f"\n--- {tag}: trained, skipped ({', '.join(tbands)})")
+                    if a.save_layers and m not in no_layers and not (base / tag / "layers").is_dir():
+                        print(f"    WARNING: --save-layers was given, but {tag} was trained without it (no layers/ folder).\n"
+                              f"    Its per-layer networks cannot be made afterwards; delete {base / tag} to retrain with snapshots.")
+                else:
+                    cmd = [py, "scripts/train.py", "--scenario", s, "--train", cfg, "--tag", tag, "--device", a.device,
+                           "--out", a.out, "--seed", str(a.seed), "--set", f"model.T={T}", *named, *vset, *a.set]
+                    cmd[6:6] = data_opts + nm_opts
+                    if proto != "paper":
+                        cmd[6:6] = ["--protocol", proto]
+                    if train_edges:
+                        cmd[6:6] = ["--snr", *[f"{e:g}" for e in train_edges]]
+                    if a.save_layers and m not in no_layers:
+                        cmd.insert(6, "--save-layers")
+                    if a.smoke:
+                        cmd.insert(6, "--smoke")
+                    run(cmd, a.dry_run)
+                plan.append((scenario_run_name(sc, a.smoke), tag))
+                if not ft_edges:
+                    continue
+                if len(tbands) != 1:
+                    print(f"--- {tag}: {len(tbands)} trained bands -> no fine-tune (fine-tune starts from ONE network; "
+                          "use --ft-snr none, or train one range)")
+                    continue
+                want = 30 if a.smoke else a.ft_iters
+                # <tag>_ft_<edges>dB_<iterations>[_margin..]: the budget is in the name, so budgets never mix
+                ftag = naming.ft_tag(tag, ft_edges, want, a.ft_margin, ft_extra)
+                done = lambda t: all((base / t / f"{t}_{b}.pt").exists() for b in band_names(ft_edges))  # noqa: E731
+                legacy = None
+                for old in naming.legacy_ft_tags(tag, ft_edges, a.ft_margin):     # v23 and older: <tag>-ft[edges]
+                    if not done(ftag) and done(old):
+                        try:
+                            got = int(json.loads((base / old / "finetune_log.json").read_text(encoding="utf-8"))["args"]["iters"])
+                        except (OSError, ValueError, KeyError, TypeError):
+                            got = None
+                        if got == want:
+                            legacy = old
+                if legacy:
+                    print(f"--- {legacy}: fine-tuned ({want} iterations), skipped. Its name is the old one; new name "
+                          f"{ftag} (scripts/rename_runs.py renames it)")
+                    plan.append((scenario_run_name(sc, a.smoke), legacy))
+                    continue
+                if done(ftag):
+                    print(f"--- {ftag}: fine-tuned, skipped")
+                else:
+                    # no --scenario: the fine-tune uses the data of the network's own training (its train_log.json),
+                    # and writes next to it (outputs/<scenario>/<ftag>)
+                    cmd = [py, "scripts/finetune_bands.py", "--snr", *[f"{e:g}" for e in ft_edges],
+                           "--from", base / tag / f"{tag}_{tbands[0]}.pt", "--tag", ftag,
+                           "--iters", str(30 if a.smoke else a.ft_iters), "--device", a.device, "--seed", str(a.seed)]
+                    if a.smoke:
+                        cmd += ["--val-every", "10"]
+                    if clip is not None:
+                        cmd += ["--grad-clip", f"{clip:g}"]
+                    cmd += ft_opts
+                    run(cmd, a.dry_run)
+                plan.append((scenario_run_name(sc, a.smoke), ftag))
+            if len(variants) == 2:
+                best_runs[m] = vtags
+        if best_runs:
+            choose_best_warm_start(base, best_runs, a.dry_run)
         if ens:
             make_suite_ensemble(a, py, base, sc, ens, train_edges, ft_edges, tbands_of=lambda: tbands,
                                 named=named, extra=extra, ft_extra=ft_extra, plan=plan)
@@ -486,6 +551,7 @@ def main():
         print(f"  {s:22s} {t}")
     print("\nnext: compare all methods (evaluation + figures + tables):\n"
           f"  %run scripts/compare.py --scenarios {' '.join(a.scenarios)}" + (" --smoke" if a.smoke else "")
+          + (" --best" if a.warm_start == "best" else "")
           + (f" --noise-model {noise_models.canonical(a.noise_model)}" if a.noise_model else ""))
 
 

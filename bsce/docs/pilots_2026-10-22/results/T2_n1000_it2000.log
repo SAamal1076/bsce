@@ -1,0 +1,16 @@
+  LADMM (original) seed 0: 0 dB=-1.92  4 dB=-6.32  8 dB=-8.45  12 dB=-9.29  16 dB=-9.61  20 dB=-9.74  train=-14.84  validation=-7.14  seconds=162.49
+  LADMM (original) seed 1: 0 dB=-1.95  4 dB=-6.34  8 dB=-8.45  12 dB=-9.27  16 dB=-9.59  20 dB=-9.71  train=-14.81  validation=-7.14  seconds=139.86
+  LADMM (original) seed 2: 0 dB=-1.95  4 dB=-6.33  8 dB=-8.46  12 dB=-9.29  16 dB=-9.62  20 dB=-9.73  train=-14.82  validation=-7.20  seconds=148.91
+LADMM (original)                         0 dB=  -1.94±0.02  4 dB=  -6.33±0.01  8 dB=  -8.45±0.01  12 dB=  -9.28±0.01  16 dB=  -9.61±0.01  20 dB=  -9.73±0.01  train= -14.82±0.01  params=131078  150s
+  adaptive, median noise level seed 0: 0 dB=-5.12  4 dB=-7.58  8 dB=-9.21  12 dB=-10.07  16 dB=-10.45  20 dB=-10.62  train=-14.96  validation=-8.86  seconds=178.53
+  adaptive, median noise level seed 1: 0 dB=-5.11  4 dB=-7.60  8 dB=-9.21  12 dB=-10.07  16 dB=-10.46  20 dB=-10.63  train=-14.97  validation=-8.83  seconds=187.10
+  adaptive, median noise level seed 2: 0 dB=-5.11  4 dB=-7.61  8 dB=-9.24  12 dB=-10.10  16 dB=-10.49  20 dB=-10.65  train=-14.96  validation=-8.80  seconds=185.30
+adaptive, median noise level             0 dB=  -5.11±0.00  4 dB=  -7.60±0.01  8 dB=  -9.22±0.02  12 dB= -10.08±0.02  16 dB= -10.47±0.02  20 dB= -10.63±0.02  train= -14.96±0.01  params=131078  184s
+  + idea 1: residual noise level seed 0: 0 dB=-5.17  4 dB=-7.53  8 dB=-9.09  12 dB=-9.92  16 dB=-10.26  20 dB=-10.42  train=-15.52  validation=-8.74  seconds=184.74
+  + idea 1: residual noise level seed 1: 0 dB=-5.17  4 dB=-7.54  8 dB=-9.11  12 dB=-9.93  16 dB=-10.31  20 dB=-10.46  train=-15.53  validation=-8.72  seconds=193.94
+  + idea 1: residual noise level seed 2: 0 dB=-5.18  4 dB=-7.55  8 dB=-9.12  12 dB=-9.94  16 dB=-10.28  20 dB=-10.44  train=-15.53  validation=-8.70  seconds=186.84
++ idea 1: residual noise level           0 dB=  -5.17±0.00  4 dB=  -7.54±0.01  8 dB=  -9.10±0.02  12 dB=  -9.93±0.01  16 dB= -10.28±0.02  20 dB= -10.44±0.02  train= -15.53±0.00  params=131078  189s
+  + ideas 1 and 2 seed 0: 0 dB=-5.23  4 dB=-7.56  8 dB=-9.09  12 dB=-9.98  16 dB=-10.39  20 dB=-10.59  train=-16.28  validation=-8.76  seconds=320.95
+  + ideas 1 and 2 seed 1: 0 dB=-5.22  4 dB=-7.57  8 dB=-9.09  12 dB=-9.94  16 dB=-10.37  20 dB=-10.57  train=-16.30  validation=-8.70  seconds=327.93
+  + ideas 1 and 2 seed 2: 0 dB=-5.26  4 dB=-7.56  8 dB=-9.13  12 dB=-9.98  16 dB=-10.39  20 dB=-10.57  train=-16.30  validation=-8.75  seconds=357.58
++ ideas 1 and 2                          0 dB=  -5.24±0.02  4 dB=  -7.56±0.00  8 dB=  -9.10±0.03  12 dB=  -9.97±0.03  16 dB= -10.38±0.01  20 dB= -10.58±0.01  train= -16.29±0.01  params=131081  335s

@@ -162,6 +162,9 @@ def main():
                     help="ft: every fine-tune; onenet: every one-network-0-20 dB run (any suffix); adds to --tags")
     ap.add_argument("--exclude", nargs="*", default=None,
                     help="leave out the run folders matching these patterns, e.g. '*_ft_*' (passed to evaluate.py)")
+    ap.add_argument("--best", action="store_true",
+                    help="v31.3: every method in its best configuration: leave out the variants that run_suite.py "
+                         "--warm-start best did not choose (outputs/<SCENARIO>/best_warm_start.json)")
     ap.add_argument("--ref", default="GM-LAMP-authors")
     ap.add_argument("--no-authors", action="store_true")
     ap.add_argument("--classical", default="amp")
@@ -216,8 +219,18 @@ def main():
                "--classical", a.classical, "--device", a.device, "--noise-model", nm]
         if tags:
             cmd += ["--tags", *tags]
-        if a.exclude:
-            cmd += ["--exclude", *a.exclude]
+        exclude = list(a.exclude or [])
+        if a.best:                                   # the variants not chosen on validation (run_suite --warm-start best)
+            bf = runs / "best_warm_start.json"
+            if bf.exists():
+                choice = json.loads(bf.read_text(encoding="utf-8"))
+                exclude += [p for c in choice.values() for p in c.get("exclude", [])]
+                print(f"[compare] {sc['name']}: best configuration of every method (best_warm_start.json): "
+                      + ", ".join(c["chosen"] for c in choice.values()))
+            else:
+                print(f"[compare] {sc['name']}: --best, but {bf} does not exist (run_suite.py --warm-start best)")
+        if exclude:
+            cmd += ["--exclude", *exclude]
         if a.polish != "none":
             cmd += ["--polish", a.polish]
         if {"l1", "grwl1"} & set(a.classical.split(",")):          # v31: the tuned classical baselines

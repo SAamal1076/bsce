@@ -263,8 +263,8 @@ options:
 ```
 usage: compare.py [-h] --scenarios SCENARIOS [SCENARIOS ...]
                   [--tags [TAGS ...]] [--preset {ft,onenet}]
-                  [--exclude [EXCLUDE ...]] [--ref REF] [--no-authors]
-                  [--classical CLASSICAL]
+                  [--exclude [EXCLUDE ...]] [--best] [--ref REF]
+                  [--no-authors] [--classical CLASSICAL]
                   [--classical-params CLASSICAL_PARAMS] [--no-cost]
                   [--name NAME] [--outputs OUTPUTS] [--results RESULTS]
                   [--device DEVICE] [--smoke] [--polish {none,band,snr}]
@@ -315,6 +315,10 @@ options:
   --exclude [EXCLUDE ...]
                         leave out the run folders matching these patterns,
                         e.g. '*_ft_*' (passed to evaluate.py)
+  --best                v31.3: every method in its best configuration: leave
+                        out the variants that run_suite.py --warm-start best
+                        did not choose
+                        (outputs/<SCENARIO>/best_warm_start.json)
   --ref REF
   --no-authors
   --classical CLASSICAL
@@ -1289,6 +1293,7 @@ usage: run_suite.py [-h] --scenarios SCENARIOS [SCENARIOS ...]
                     [--force-protocol] [--train-snr TRAIN_SNR [TRAIN_SNR ...]]
                     [--ft-snr FT_SNR [FT_SNR ...]] [--ft-iters FT_ITERS]
                     [--ft-patience FT_PATIENCE] [--save-layers]
+                    [--warm-start {protocol,cold,warm,best}]
                     [--schedule {layerwise,e2e}] [--e2e-steps E2E_STEPS]
                     [--grad-clip GRAD_CLIP] [--margin MARGIN]
                     [--ft-margin FT_MARGIN] [--val-snr VAL_SNR [VAL_SNR ...]]
@@ -1352,6 +1357,14 @@ SNR        --train-snr 0 20       band edges of the networks trained from scratc
                                   fine-tune minibatches spread evenly too; validation over a range at equally spaced
                                   SNRs. Suffix _fair (trained and fine-tuned folders); files <band>_fair.mat
            --snr-step 0.2         with --snr-dist fair: the SNRs on the grid lo, lo+0.2, ..., hi, equal counts (_fair0p2)
+WARM START --warm-start protocol   (default) as the protocol says (ladmm_best / fair / e2e: cold; gmlamp, gmlamp_best:
+                                  warm; paper: each method's own config, LAMP / GM-LAMP warm)
+           --warm-start cold|warm  the same for every method (folder suffix _cold / _warm)
+           --warm-start best      (v31.3) every layer-wise method trained twice, cold and warm (_cold / _warm), and the
+                                  one with the better VALIDATION NMSE kept: outputs/<SCENARIO>/best_warm_start.json;
+                                  compare.py --best leaves the other one out. Each method is then compared in its best
+                                  configuration, chosen by one rule for all and never on the test set. Methods that train
+                                  all layers together (end to end) have no new layer to initialise: trained once.
 DEPTH      --save-layers          save the network after every layer (scripts/depth_snapshots.py plots the depth curve);
                                   v31.2: methods that train end to end in a mixed list train at full depth only
 SCHEDULE   --schedule layerwise   (default) every method as its protocol says: layer by layer for ladmm_best / gmlamp /
@@ -1411,6 +1424,11 @@ options:
                         4000 (finetune_bands.py); 0 = always the whole --ft-
                         iters (folder suffix _pat0)
   --save-layers
+  --warm-start {protocol,cold,warm,best}
+                        v31.3: initialise each new layer from the trained
+                        previous one? protocol (default): as the protocol
+                        says; cold / warm: for every method; best: both, the
+                        better one on validation kept
   --schedule {layerwise,e2e}
                         layerwise (default): as the protocol says; e2e: every
                         method end to end

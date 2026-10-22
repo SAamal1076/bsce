@@ -14,6 +14,7 @@ classical baselines), each port verified against the original MATLAB / TensorFlo
 | `Add bsce v31.2` | the package as delivered (19 Oct 2026), unchanged |
 | `Fix the bugs of review round 1 (R1-R14)` | training, tables and export fixes |
 | `bsce v31.3` | new methods `ladmmat`, `ladmmatr`, `ladmmatrd` (noise-adaptive LADMM) and the round 2 fixes |
+| `Compare every method in its best configuration` | `run_suite.py --warm-start best` + `compare.py --best`; the pilot experiments (`bsce/docs/pilots_2026-10-22/`) |
 
 What changed and why: [bsce/docs/REVIEW_2026-10-21.md](bsce/docs/REVIEW_2026-10-21.md) (both review rounds) and
 [bsce/docs/changes/CHANGES_2026-10-22_v31_3.md](bsce/docs/changes/CHANGES_2026-10-22_v31_3.md) (v31.3 and its pilot

@@ -137,7 +137,7 @@ set the learning rate, batch and stopping.
 | 1 data | `make_gmlamp_data.py` (the 4 GM-LAMP sets), `make_3gpp_data.py`, `make_dataset.py` (any size), `make_scenario.py`, `generate_data.py`, `make_sv_measurements.py`, `deepmimo_convert.py`, `sionna_make_H.py` |
 | 2 paper check | `import_gmlamp_weights.py`, `check_vs_authors.py`, `utrr_reproduce.py`, `check_gm_components.py` (v31.1: which GM-LAMP networks trained with a one-Gaussian denoiser) |
 | 3 depth | `run_suite.py --save-layers`, `depth_snapshots.py`, `promote_layer.py`, `depth_curve.py`, `select_depth.py` |
-| 4 training | `run_suite.py` (all methods), `train.py` (one), `finetune_bands.py`, `runs.py` (what is done), `rename_runs.py` |
+| 4 training | `run_suite.py` (all methods; v31.3 `--warm-start best` + `compare.py --best`: every method in its best configuration), `train.py` (one), `finetune_bands.py`, `runs.py` (what is done), `rename_runs.py` |
 | 5 comparison | `compare.py` (paper tables, `--polish`, `--preset ft` / `onenet`; v31 trained-parameter and MACs columns, `--no-cost`, `--classical-params`), `evaluate.py` (`--combiner`; v31 `--classical l1,grwl1`), `tune_classical.py` (v31), `check_combiners.py` (v30: nine test combiners, any M), `compare_noise.py`, `aggregate_seeds.py`, `make_ensemble.py`, `make_figures.py` |
 | other | `import_user_ladmm.py` (your `.pt`), `compare_variants.py`, `run_all.py`, `check_exports.py`, `status.py`, `review_pack.py`, `summarize_tests.py`, `render_report.py`, `make_cli_reference.py` |
 
