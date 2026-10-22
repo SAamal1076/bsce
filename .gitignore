@@ -26,3 +26,10 @@ build/
 
 # bsce: keep the test logs shipped with the package
 !bsce/**/*.log
+
+# bsce: made by the scripts
+bsce/data/
+bsce/outputs/
+bsce/results/
+bsce/reference/*
+!bsce/reference/user/
